@@ -11,11 +11,11 @@ locale                   : "en-US"
 site_theme               : "default"
 title                    : "MJ (Minjae) Cho"
 title_separator          : "-"
-name                     : &name "Your Name"
-description              : &description "personal description"
-url                      : https://academicpages.github.io # the base hostname & protocol for your site e.g. "https://[your GitHub username].github.io"
+name                     : &name "MJ Cho"
+description              : &description "I am a Ph.D. student at the University of Illinois Urbana-Champaign. I am majoring in Aerospace Engineering and have particular emphasis on reinforcement learning for practical robotic systems."
+url                      : https://academicpages.github.io # the base hostname & protocol for your site e.g. "mgineer117.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
-repository               : "academicpages/academicpages.github.io"
+repository               : "mgineer117.github.io"
 
 # Site Author - The following control what appear as part of the author content on the side bar.
 #               If a field is blank the icon and link will not appear, otherwise it will be shown.
@@ -27,7 +27,7 @@ author:
   pronouns         : # example: "He/Him"  
   bio              : "Ph.D. Student at Aerospace Engineering"
   location         : "Urbana-Champaign"
-  employer         : "University of Illinois Urbana-Champaign"
+  employer         : "U of Illinois Urbana-Champaign"
   uri              : # URL
   email            : "minjae5@illinois.edu" 
 
