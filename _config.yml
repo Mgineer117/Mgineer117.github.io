@@ -22,7 +22,7 @@ repository               : "mgineer117.github.io"
 #               Additional customization can be done by editing /_includes/author-profile.html
 author:
   # Biographic information
-  avatar           : "profile.png"
+  avatar           : "mj_portrait.png"
   name             : "MJ (Minjae) Cho"
   pronouns         : "He/Him"  
   bio              : "Ph.D. Student at Aerospace Engineering"
