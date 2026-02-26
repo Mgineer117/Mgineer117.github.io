@@ -13,7 +13,7 @@ title                    : "MJ (Minjae) Cho"
 title_separator          : "-"
 name                     : &name "MJ Cho"
 description              : &description "I am a Ph.D. student at the University of Illinois Urbana-Champaign. I am majoring in Aerospace Engineering and have particular emphasis on reinforcement learning for practical robotic systems."
-url                      : https://academicpages.github.io # the base hostname & protocol for your site e.g. "mgineer117.github.io"
+url                      : https://mgineer117.github.io # the base hostname & protocol for your site e.g. "mgineer117.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
 repository               : "mgineer117.github.io"
 
@@ -24,7 +24,7 @@ author:
   # Biographic information
   avatar           : "profile.png"
   name             : "MJ (Minjae) Cho"
-  pronouns         : # example: "He/Him"  
+  pronouns         : "He/Him"  
   bio              : "Ph.D. Student at Aerospace Engineering"
   location         : "Urbana-Champaign"
   employer         : "U of Illinois Urbana-Champaign"
@@ -45,7 +45,7 @@ author:
   bitbucket        : # Username - Update with your username on the site
   codepen          : # Username
   dribbble         : # Username
-  github           : "academicpages"
+  github           : "mgineer117"
   kaggle           : # Username  
   stackoverflow    : # User number or user number and name (i.e., use "1" or "1/jeff-atwood")    
 
