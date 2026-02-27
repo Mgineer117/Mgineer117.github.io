@@ -9,7 +9,7 @@
 # Basic Site Settings
 locale                   : "en-US"
 site_theme               : "default"
-title                    : "MJ (Minjae) Cho"
+title                    : "MJ's Homepage"
 title_separator          : "-"
 name                     : &name "MJ Cho"
 description              : &description "I am a Ph.D. student at the University of Illinois Urbana-Champaign. I am majoring in Aerospace Engineering and have particular emphasis on reinforcement learning for practical robotic systems."
