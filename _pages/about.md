@@ -8,18 +8,14 @@ redirect_from:
   - /about.html
 ---
 
-# MJ (Minjae) Cho
+I am a **Ph.D. student** in the Department of **Aerospace Engineering** at the **University of Illinois Urbana-Champaign (UIUC)**. Currently, I serve as a **Graduate Research Assistant** within the [**Laboratory for Intelligent Robots and Agents (LIRA)**](https://tran.aerospace.illinois.edu/), where I am privileged to be advised by [**Professor Huy T. Tran**](https://tran.aerospace.illinois.edu/team/).
+I also collaborate with [**Professor Hiroyasu Tsukamoto**](https://aerospace.illinois.edu/directory/profile/hiroyasu) and his [**N-AXCIS Laboratory**](https://hirotsukamoto.com/).
 
-I am a **Ph.D. student** in the Department of **Aerospace Engineering** at the **University of Illinois Urbana-Champaign (UIUC)**. My academic journey is driven by a fascination with the intersection of high-fidelity control theory and advanced machine learning.
+## <span style="color: #13294B;">🔬 Research Interests</span>
 
-Currently, I serve as a **Graduate Research Assistant** within the [**Laboratory for Intelligent Robots and Agents (LIRA)**](https://tran.aerospace.illinois.edu/), where I am privileged to be advised by [**Professor Huy T. Tran**](https://tran.aerospace.illinois.edu/team/).
+* **Core Mission:** Deploying robust, autonomous AI-based robots in complex physical environments at the intersection of reinforcement learning and control theory.
+* **Research Focus:** I tackle high-level planning and safety-assurance problems. These include safe RL, meta RL, sparse-reward RL, and safety certification of path-tracking problems.
 
-## 🛰️ Research Focus
-My doctoral research emphasizes the development of robust and safe autonomous systems. I am particularly interested in architecting **Reinforcement Learning (RL)** algorithms that are both stable and scalable for the next generation of **AI Robotics**. Key areas of investigation include:
-
-* **Constrained Offline RL:** Developing safety-conservative policies that learn effectively from static, real-world datasets.
-* **Safety-Critical Control:** Utilizing **Control Contraction Metrics (CCM)** and intrinsic reward optimization to guarantee stability in autonomous flight.
-* **High-Fidelity Simulation:** Leveraging **NVIDIA Isaac Sim** and **PyTorch** to facilitate seamless sim-to-real transitions.
 
 ## 📢 Recent News
 * **AIAA AVIATION 2026:** I will be presenting our paper, *"Sparsity-based safety conservatism for constrained offline reinforcement learning,"* at the **AIAA AVIATION Forum** in June 2026.
