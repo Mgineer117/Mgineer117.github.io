@@ -23,7 +23,7 @@ repository               : "mgineer117.github.io"
 author:
   # Biographic information
   avatar           : "mj_portrait.png"
-  name             : "MJ (Minjae) Cho"
+  name             : "MJ (Minjae) Cho (조민재)"
   pronouns         : "He/Him"  
   bio              : "Ph.D. Student at Aerospace Engineering"
   location         : "Urbana-Champaign"
@@ -79,10 +79,10 @@ author:
 publication_category:
   preprints:
     title: 'Preprints & Working Papers'
-  journals:
-    title: 'Journal Articles'    
   conferences:
     title: 'Conference Proceedings'
+  journals:
+    title: 'Journal Articles'
 
 # Site Settings
 teaser                   :  # filename of teaser fallback teaser image placed in /images/, .e.g. "500x300.png"
