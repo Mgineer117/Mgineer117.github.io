@@ -14,35 +14,30 @@ redirect_from:
         <span style="color: #E84A27; font-weight: 700;">University of Illinois Urbana-Champaign (UIUC)</span>.
     </p>
 
-    <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px;">
-        <div style="flex: 1; min-width: 280px; background: #fdfdfe; border: 1px solid #e1e4e8; border-top: 4px solid #13294B; padding: 15px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-            <div style="font-size: 11px; font-weight: 700; color: #57606a; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">📍 Primary Lab</div>
-            <h4 style="margin: 0 0 5px 0; font-size: 17px;">
-                <a href="https://tran.aerospace.illinois.edu/" target="_blank" style="color: #13294B; text-decoration: none;">Lab for Itelligent Robots and Agents</a>
-            </h4>
-            <p style="margin: 0; font-size: 14px; line-height: 1.4;">
-                Advised by <a href="https://tran.aerospace.illinois.edu/team/" target="_blank" style="font-weight: 600; color: #24292e;">Prof. Huy T. Tran</a>
-            </p>
+    <div style="background: #fdfdfe; border: 1px solid #e1e4e8; border-top: 4px solid #13294B; padding: 20px 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.04);">
+        <div style="font-size: 11px; font-weight: 700; color: #57606a; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.6px; display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 14px;">📍</span> Primary Research Lab
         </div>
-
-        <div style="flex: 1; min-width: 280px; background: #fdfdfe; border: 1px solid #e1e4e8; border-top: 4px solid #E84A27; padding: 15px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-            <div style="font-size: 11px; font-weight: 700; color: #57606a; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">🤝 Collaboration</div>
-            <h4 style="margin: 0 0 5px 0; font-size: 17px;">
-                <a href="https://hirotsukamoto.com/" target="_blank" style="color: #13294B; text-decoration: none;">N-ACXIS Lab</a>
-            </h4>
-            <p style="margin: 0; font-size: 14px; line-height: 1.4;">
-                Collaborating with <a href="https://aerospace.illinois.edu/directory/profile/hiroyasu" target="_blank" style="font-weight: 600; color: #24292e;">Prof. Hiroyasu Tsukamoto</a>
-            </p>
-        </div>
+        
+        <h4 style="margin: 0 0 8px 0; font-size: 19px; font-weight: 700;">
+            <a href="https://tran.aerospace.illinois.edu/" target="_blank" style="color: #13294B; text-decoration: none; border-bottom: 1px solid transparent; transition: border 0.2s;">
+                Lab for Intelligent Robots and Agents (LIRA)
+            </a>
+        </h4>
+        
+        <p style="margin: 0; font-size: 15px; color: #24292e; line-height: 1.4;">
+            Previleaed to be advised by <a href="https://tran.aerospace.illinois.edu/team/" target="_blank" style="font-weight: 600; color: #13294B; text-decoration: none; border-bottom: 1px dashed #d0d7de;">Prof. Huy T. Tran</a>
+        </p>
     </div>
 </div>
 
 <div style="margin-bottom: 35px; font-size: 14px; color: #495057; line-height: 1.8; background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #e1e4e8;">
-    <div style="font-weight: 700; color: #13294B; margin-bottom: 8px;">🤝 Past Collaborators:</div>
+    <div style="font-weight: 700; color: #13294B; margin-bottom: 8px;">🤝 Collaborators:</div>
     <div style="display: flex; flex-wrap: wrap; row-gap: 5px; column-gap: 15px;">
+        <span><a href="https://hirotsukamoto.com/" target="_blank" style="color: #24292e; text-decoration: none; border-bottom: 1px dashed #d0d7de;"><strong>Hiroyasu Tsukamoto</strong></a> <small>(UIUC)</small></span>
         <span><a href="https://sites.google.com/view/sun-research-lab/people?authuser=0" target="_blank" style="color: #24292e; text-decoration: none; border-bottom: 1px dashed #d0d7de;"><strong>Chuangchuang Sun</strong></a> <small>(Villanova Univ.)</small></span>
         <span><a href="https://acl.mit.edu/people" target="_blank" style="color: #24292e; text-decoration: none; border-bottom: 1px dashed #d0d7de;"><strong>Jonathan P. How</strong></a> <small>(MIT)</small></span>
-        <span><a href="https://www.math.msstate.edu/directory/skim" target="_blank" style="color: #24292e; text-decoration: none; border-bottom: 1px dashed #d0d7de;"><strong>Seonjai Kim</strong></a> <small>(Mississippi State Univ.)</small></span>
+        <span><a href="https://www.math.msstate.edu/directory/skim" target="_blank" style="color: #24292e; text-decoration: none; border-bottom: 1px dashed #d0d7de;"><strong>Seongjai Kim</strong></a> <small>(Mississippi State Univ.)</small></span>
         <span><a href="https://ftpl.kaist.ac.kr/People" target="_blank" style="color: #24292e; text-decoration: none; border-bottom: 1px dashed #d0d7de;"><strong>Joonsik Hwang</strong></a> <small>(KAIST)</small></span>
         <span><a href="https://www.cavs.msstate.edu/directory/information.php?d=1983" target="_blank" style="color: #24292e; text-decoration: none; border-bottom: 1px dashed #d0d7de;"><strong>Seongkwang Mun</strong></a> <small>(Mississippi State Univ.)</small></span>
     </div>
