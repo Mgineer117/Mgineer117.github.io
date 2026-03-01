@@ -50,7 +50,7 @@ redirect_from:
             2024.07 – <span style="color: #13294B;">Present</span>
         </div>
         <div style="width: 50px; flex-shrink: 0;">
-            <img src="/files/UIUC_logo.png" alt="UIUC" style="width: 100%; max-height: 50px; object-fit: contain;">
+            <img src="{{ site.baseurl }}/files/UIUC_logo.png" alt="UIUC" style="width: 100%; max-height: 50px; object-fit: contain;">
         </div>
         <div style="flex: 1;">
             <h4 style="margin: 0; color: #13294B; font-size: 18px; font-weight: 700;">Ph.D. Student</h4>
@@ -66,7 +66,7 @@ redirect_from:
             2019.08 – 2024.06
         </div>
         <div style="width: 50px; flex-shrink: 0;">
-            <img src="/files/Msstate_logo.png" alt="MSState" style="width: 100%; max-height: 50px; object-fit: contain;">
+            <img src="{{ site.baseurl }}/files/Msstate_logo.png" alt="MSState" style="width: 100%; max-height: 50px; object-fit: contain;">
         </div>
         <div style="flex: 1;">
             <h4 style="margin: 0; color: #13294B; font-size: 18px; font-weight: 700;">Student</h4>
@@ -183,8 +183,8 @@ redirect_from:
 
         <div id="project-gallery" class="carousel-mode">
             
-            <a href="/publication/2026-01-30-IRPO" class="project-card" data-topics="All,Hierarchical RL">
-                <img src="/files/IRPO/pointmazev1.gif" alt="IRPO" class="project-img">
+            <a href="{{ site.baseurl }}/publication/2026-01-30-IRPO" class="project-card" data-topics="All,Hierarchical RL">
+                <img src="{{ site.baseurl }}/files/IRPO/pointmazev1.gif" alt="IRPO" class="project-img">
                 <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">Intrinsic Reward Policy Optimization (IRPO)</div>
                 <div style="font-size: 11px; font-weight: 600; color: #57606a; background: #f1f4f8; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #d0d7de;">Algorithm for Sparse-Reward Navigations.</div>
                 <div class="card-topics">
@@ -193,8 +193,8 @@ redirect_from:
                 </div>
             </a>
 
-            <a href="/publication/2024-12-16-HIMETA" class="project-card" data-topics="All,Hierarchical RL,Meta-RL">
-                <img src="/files/HIMETA/himeta.gif" alt="HIMETA" class="project-img">
+            <a href="{{ site.baseurl }}/publication/2024-12-16-HIMETA" class="project-card" data-topics="All,Hierarchical RL,Meta-RL">
+                <img src="{{ site.baseurl }}/files/HIMETA/himeta.gif" alt="HIMETA" class="project-img">
                 <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">Hierarchical meta-reinforcement learning (HiMeta)</div>
                 <div style="font-size: 11px; font-weight: 600; color: #57606a; background: #f1f4f8; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #d0d7de;">Adapting to Out-Of-Distributional Tasks</div>
                 <div class="card-topics">
@@ -204,8 +204,8 @@ redirect_from:
                 </div>
             </a>
 
-            <a href="/publication/your-third-paper-url" class="project-card" data-topics="All,Safe RL">
-                <img src="/files/Sparsity/sparsity.png" alt="Sparsity" class="project-img">
+            <a href="{{ site.baseurl }}/publication/your-third-paper-url" class="project-card" data-topics="All,Safe RL">
+                <img src="{{ site.baseurl }}/files/Sparsity/sparsity.png" alt="Sparsity" class="project-img">
                 <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">Sparsity-based Safety Conservatism</div>
                 <div style="font-size: 11px; font-weight: 600; color: #57606a; background: #f1f4f8; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #d0d7de;">Data Sparsity for Safety Overestimation</div>
                 <div class="card-topics">
@@ -214,8 +214,8 @@ redirect_from:
                 </div>
             </a>
 
-            <a href="/publication/2025-05-28-CAC" class="project-card" data-topics="All,Safe RL">
-                <img src="/files/CAC/carl.gif" alt="CAC" class="project-img">
+            <a href="{{ site.baseurl }}/publication/2025-05-28-CAC" class="project-card" data-topics="All,Safe RL">
+                <img src="{{ site.baseurl }}/files/CAC/carl.gif" alt="CAC" class="project-img">
                 <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">Contraction Actor-Critic (CAC)</div>
                 <div style="font-size: 11px; font-weight: 600; color: #57606a; background: #f1f4f8; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #d0d7de;">Certifiable and Robust RL for Path-Tracking</div>
                 <div class="card-topics">
@@ -224,8 +224,8 @@ redirect_from:
                 </div>
             </a>
 
-            <a href="/publication/2024-03-24-META_CPO" class="project-card" data-topics="All,Safe RL,Meta-RL">
-                <img src="/files/META_CPO/META_CPO.gif" alt="META_CPO" class="project-img">
+            <a href="{{ site.baseurl }}/publication/2024-03-24-META_CPO" class="project-card" data-topics="All,Safe RL,Meta-RL">
+                <img src="{{ site.baseurl }}/files/META_CPO/META_CPO.gif" alt="META_CPO" class="project-img">
                 <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">Constrained Meta-RL (Meta-CPO)</div>
                 <div style="font-size: 11px; font-weight: 600; color: #57606a; background: #f1f4f8; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #d0d7de;">Adaptable Safety Guarantees for Unseen Tasks</div>
                 <div class="card-topics">
@@ -235,8 +235,8 @@ redirect_from:
                 </div>
             </a>
 
-            <a href="/publication/2025-11-30-MOOD_CRL" class="project-card" data-topics="All,Offline RL">
-                <img src="/files/MOOD_CRL/walker_distribution.png" alt="MOOD-CRL" class="project-img">
+            <a href="{{ site.baseurl }}/publication/2025-11-30-MOOD_CRL" class="project-card" data-topics="All,Offline RL">
+                <img src="{{ site.baseurl }}/files/MOOD_CRL/walker_distribution.png" alt="MOOD-CRL" class="project-img">
                 <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">OOD Adaptation in Offline RL</div>
                 <div style="font-size: 11px; font-weight: 600; color: #57606a; background: #f1f4f8; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #d0d7de;">Using Causal Normalizing Flows for Offline RL</div>
                 <div class="card-topics">
@@ -248,7 +248,7 @@ redirect_from:
     </div>
 
     <p style="margin: 20px 0 0 0; font-size: 13px; color: #57606a; border-top: 1px solid #e1e4e8; padding-top: 12px; text-align: center;">
-        <em>Click a topic to filter, or explore <a href="/publications/" style="font-weight: 600; color: #13294B; text-decoration: underline;">all publications</a>.</em>
+        <em>Click a topic to filter, or explore <a href="{{ site.baseurl }}/publications/" style="font-weight: 600; color: #13294B; text-decoration: underline;">all publications</a>.</em>
     </p>
 </div>
 
@@ -262,7 +262,7 @@ redirect_from:
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
 
-        // Show a single slide (used in "All" mode)
+        /* Show a single slide (used in "All" mode) */
         function showCarouselSlide() {
             projects.forEach(p => p.style.display = 'none');
             if (projects.length > 0) {
@@ -280,25 +280,25 @@ redirect_from:
             showCarouselSlide();
         }
 
-        // Arrow Click Listeners
+        /* Arrow Click Listeners */
         prevBtn.addEventListener('click', () => {
             clearInterval(slideInterval);
             prevSlide();
-            slideInterval = setInterval(nextSlide, 3500); // Restart auto-rotation
+            slideInterval = setInterval(nextSlide, 3500); /* Restart auto-rotation */
         });
 
         nextBtn.addEventListener('click', () => {
             clearInterval(slideInterval);
             nextSlide();
-            slideInterval = setInterval(nextSlide, 3500); // Restart auto-rotation
+            slideInterval = setInterval(nextSlide, 3500); /* Restart auto-rotation */
         });
 
-        // Main filter function
+        /* Main filter function */
         function filterProjects(topic) {
             clearInterval(slideInterval);
 
             if (topic === 'All') {
-                // BEHAVIOR 1: Single Item Auto-Rotating Carousel with Arrows
+                /* BEHAVIOR 1: Single Item Auto-Rotating Carousel with Arrows */
                 gallery.className = 'carousel-mode';
                 prevBtn.style.display = 'flex';
                 nextBtn.style.display = 'flex';
@@ -306,7 +306,7 @@ redirect_from:
                 showCarouselSlide();
                 slideInterval = setInterval(nextSlide, 3500); 
             } else {
-                // BEHAVIOR 2: Grid Layout without arrows (fits 2 side-by-side)
+                /* BEHAVIOR 2: Grid Layout without arrows (fits 2 side-by-side) */
                 gallery.className = 'gallery-mode';
                 prevBtn.style.display = 'none';
                 nextBtn.style.display = 'none';
@@ -320,7 +320,7 @@ redirect_from:
             }
         }
 
-        // Filter Button Click Listeners
+        /* Filter Button Click Listeners */
         buttons.forEach(btn => {
             btn.addEventListener('click', function() {
                 buttons.forEach(b => b.classList.remove('active-topic'));
@@ -329,7 +329,7 @@ redirect_from:
             });
         });
 
-        // Initialize with 'All' Mode on load
+        /* Initialize with 'All' Mode on load */
         filterProjects('All');
     });
 </script>
