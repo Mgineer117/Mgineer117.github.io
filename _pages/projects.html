@@ -55,7 +55,7 @@ author_profile: true
 
 <div id="tag-filters" style="width: 100%; clear: both; margin-bottom: 20px; padding-bottom: 10px;">
   <span style="font-weight: bold; margin-right: 15px; color: #24292e; font-size: 16px;">Filter by topic:</span>
-  <button class="tag-filter-btn active-tag" data-tag="all">All</button>
+  <button class="tag-filter-btn active-tag" data-tag="all">All Projects</button>
   {% for tag in unique_tags %}
     <button class="tag-filter-btn" data-tag="{{ tag }}">{{ tag }}</button>
   {% endfor %}
@@ -72,13 +72,11 @@ author_profile: true
 <script>
   document.addEventListener("DOMContentLoaded", function() {
     const buttons = document.querySelectorAll('.tag-filter-btn');
-    // Note: The selector here must match the class inside archive-single-project.html
     const cards = document.querySelectorAll('.project-card');
 
     function filterProjects(selectedTag) {
       cards.forEach(card => {
         const cardTags = card.getAttribute('data-tags') || "";
-        
         if (selectedTag === 'all' || cardTags.split(',').includes(selectedTag)) {
           card.style.setProperty('display', 'flex', 'important');
         } else {
@@ -87,7 +85,6 @@ author_profile: true
       });
     }
 
-    // Handle URL Tags
     const urlParams = new URLSearchParams(window.location.search);
     const tagFromUrl = urlParams.get('tag');
     if (tagFromUrl) {
@@ -100,16 +97,13 @@ author_profile: true
       });
     }
 
-    // Button Click Logic
     buttons.forEach(button => {
       button.addEventListener('click', function() {
         buttons.forEach(b => b.classList.remove('active-tag'));
         this.classList.add('active-tag');
         const selectedTag = this.getAttribute('data-tag');
-        
         const newUrl = selectedTag === 'all' ? window.location.pathname : window.location.pathname + '?tag=' + encodeURIComponent(selectedTag);
         window.history.pushState({}, '', newUrl);
-
         filterProjects(selectedTag);
       });
     });

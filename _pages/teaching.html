@@ -7,6 +7,21 @@ author_profile: true
 
 {% include base_path %}
 
-{% for post in site.teaching reversed %}
-  {% include archive-single.html %}
-{% endfor %}
+<style>
+  #teaching-container {
+    display: block !important;
+    width: 100% !important;
+    clear: both !important;
+    margin-top: 30px;
+  }
+  @media (max-width: 600px) {
+    .teaching-card { flex-direction: column !important; gap: 15px !important; }
+    .teaching-icon { flex: 0 0 70px !important; width: 100% !important; min-height: 70px !important; }
+  }
+</style>
+
+<div id="teaching-container">
+  {% for post in site.teaching reversed %}
+    {% include archive-single-teaching.html %}
+  {% endfor %}
+</div>

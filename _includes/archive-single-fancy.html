@@ -1,31 +1,31 @@
 {% include base_path %}
 
 <div class="publication-card" 
-     data-tags="{% if post.tags %}{% for tag in post.tags %}{{ tag }},{% endfor %}{% endif %}" 
+     data-tags="{% if post.tags %}{% for tag in post.tags %}{{ tag }}{% unless forloop.last %},{% endunless %}{% endfor %}{% endif %}" 
      style="display: flex; align-items: stretch; gap: 30px; margin-bottom: 50px; width: 100%; clear: both; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
 
   {% if post.teaser %}
   <div class="teaser-wrapper" style="flex: 0 0 240px; width: 240px; display: flex;">
     <img src="{{ base_path }}{{ post.teaser }}" 
          alt="Teaser for {{ post.title }}" 
-         style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 1px solid #e1e4e8; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+         style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px; border: 1px solid #e1e4e8; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
   </div>
   {% endif %}
 
   <div class="card-text-content" style="flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
     
     <div class="text-top-section">
-      <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 20px; line-height: 1.3;">
+      <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 18px; line-height: 1.3; font-weight: 700;">
         <a href="{{ base_path }}{{ post.url }}" rel="permalink" style="color: #13294B; text-decoration: none;">{{ post.title }}</a>
       </h3>
       
-      <div style="font-size: 13.5px; color: #57606a; font-weight: 600; margin-bottom: 12px; display: flex; gap: 15px; flex-wrap: wrap;">
+      <div style="font-size: 14px; color: #57606a; font-weight: 600; margin-bottom: 12px; display: flex; gap: 15px; flex-wrap: wrap;">
         {% if post.date %}<span>📅 {{ post.date | date: "%B %Y" }}</span>{% endif %}
         {% if post.venue %}<span>📌 {{ post.venue }}</span>{% endif %}
       </div>
 
       {% if post.excerpt %}
-        <p style="font-size: 14.5px; color: #24292e; margin-bottom: 15px; line-height: 1.5; text-align: justify;">
+        <p style="font-size: 16px; color: #24292e; margin-bottom: 15px; line-height: 1.6; text-align: justify;">
           <strong>TL;DR:</strong> {{ post.excerpt | strip_html }}
         </p>
       {% endif %}
@@ -33,7 +33,7 @@
       {% if post.tags %}
       <div style="margin-bottom: 15px;">
         {% for tag in post.tags %}
-          <span style="display: inline-block; background: #f1f4f8; color: #13294B; font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 12px; margin-right: 5px; border: 1px solid #d0d7de;">
+          <span style="display: inline-block; background: #eef2f7; color: #13294B; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; margin-right: 6px; border: 1px solid #d0d7de; letter-spacing: 0.3px;">
             {{ tag }}
           </span>
         {% endfor %}
@@ -43,16 +43,20 @@
 
     <div style="display: flex; gap: 10px; margin-top: auto;">
       {% if post.paperurl %}
-        <a href="{{ post.paperurl }}" target="_blank" style="background: #13294B; color: white; padding: 6px 16px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: 600;">
+        <a href="{{ post.paperurl }}" target="_blank" style="background: #13294B; color: white; padding: 6px 16px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: 600; border: 1px solid #13294B;">
           📄 PDF
         </a>
       {% endif %}
       
       {% if post.codeurl %}
-        <a href="{{ post.codeurl }}" target="_blank" style="background: #ffffff; color: #24292e; border: 1px solid #d0d7de; padding: 6px 16px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: 600;">
+        <a href="{{ post.codeurl }}" target="_blank" style="background: #ffffff; color: #E84A27; border: 1px solid #E84A27; padding: 6px 16px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: 600;">
           💻 Code
         </a>
       {% endif %}
+
+      <a href="{{ base_path }}{{ post.url }}" style="background: #f8f9fa; color: #57606a; border: 1px solid #d0d7de; padding: 6px 16px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: 600;">
+        Details →
+      </a>
     </div>
   </div>
 

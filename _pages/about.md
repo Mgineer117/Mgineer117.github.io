@@ -69,7 +69,7 @@ redirect_from:
             <img src="files/Msstate_logo.png" alt="MSState" style="width: 100%; max-height: 50px; object-fit: contain;">
         </div>
         <div style="flex: 1;">
-            <h4 style="margin: 0; color: #13294B; font-size: 18px; font-weight: 700;">Undergraduate Student</h4>
+            <h4 style="margin: 0; color: #13294B; font-size: 18px; font-weight: 700;">Student</h4>
             <p style="margin: 4px 0 0 0; font-size: 16px; color: #24292e; line-height: 1.5;">
                 <strong>Mississippi State University</strong><br>
                 <span style="color: #57606a;">B.S. in Mechanical Engineering and Minor in Applied Mathematics</span>
