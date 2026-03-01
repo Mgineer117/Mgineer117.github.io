@@ -83,98 +83,254 @@ redirect_from:
     My research aims at enabling the power of AI in <strong>complex robotic systems</strong> at the intersection of <strong>reinforcement learning (RL)</strong> and <strong>control theory</strong>.
 </p>
 
-<div style="background: #fdfdfe; border: 1px solid #e1e4e8; border-left: 4px solid #13294B; border-radius: 6px; padding: 20px 25px; margin: 25px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-    <h4 style="margin-top: 0; margin-bottom: 15px; color: #13294B; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">Core Research Keywords</h4>
+<style>
+    .topic-btn { background: #eef2f7; color: #13294B; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 20px; border: 1px solid #d0d7de; cursor: pointer; transition: all 0.2s ease; outline: none; }
+    .topic-btn:hover { background: #13294B; color: #ffffff; border-color: #13294B; }
+    .topic-btn.active-topic { background: #13294B; color: #ffffff; border-color: #13294B; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
     
-    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
-        <div class="research-tag-container">
-            <a href="/publications/?tag=Hierarchical RL" class="research-tag">Hierarchical RL</a>
-            <div class="tag-popup" style="width: max-content; max-width: 85vw; padding: 15px;">
-                <div style="display: flex; gap: 15px; align-items: stretch;">
-                    <a href="/publication/2026-01-30-IRPO" class="popup-link" style="width: 230px; display: flex; flex-direction: column; text-decoration: none;">
-                        <img src="/files/IRPO/pointmazev1.gif" alt="IRPO" style="width: 100%; height: 160px; object-fit: cover; border-radius: 4px; border: 1px solid #e1e4e8; margin-bottom: 8px;">
-                        <div style="font-size: 12px; font-weight: 700; line-height: 1.3; color: #13294B; flex-grow: 1;">Intrinsic Reward Policy Optimization (IRPO)</div>
-                        <div style="font-size: 10px; color: #57606a; margin-top: 4px; background: #f1f4f8; padding: 2px 6px; border-radius: 4px; display: inline-block;">Algorithm for Sparse-Reward Navigations.</div>
-                    </a>
-                    <div style="width: 1px; background: #eee; align-self: stretch;"></div>
-                    <a href="/publication/2024-12-16-HIMETA" class="popup-link" style="width: 230px; display: flex; flex-direction: column; text-decoration: none;">
-                        <img src="/files/HIMETA/himeta.gif" alt="HIMETA" style="width: 100%; height: 160px; object-fit: cover; border-radius: 4px; border: 1px solid #e1e4e8; margin-bottom: 8px;">
-                        <div style="font-size: 12px; font-weight: 700; line-height: 1.3; color: #13294B; flex-grow: 1;">Hierarchical meta-reinforcement learning (HiMeta)</div>
-                        <div style="font-size: 10px; color: #57606a; margin-top: 4px; background: #f1f4f8; padding: 2px 6px; border-radius: 4px; display: inline-block;">Adapting to Out-Of-Distributional Tasks</div>
-                    </a>
+    /* Layout Modes */
+    .carousel-mode { display: flex; justify-content: center; }
+    .gallery-mode { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    @media (max-width: 650px) { .gallery-mode { grid-template-columns: 1fr; } }
+    
+    /* Card Styles - OVERRIDING THEME UNDERSCORES */
+    .project-card { 
+        display: none; 
+        flex-direction: column; 
+        text-decoration: none !important; 
+        border-bottom: none !important; 
+        animation: fadeIn 0.4s ease; 
+        text-align: center; 
+        width: 100%; 
+    }
+    .project-card:hover {
+        text-decoration: none !important;
+        border-bottom: none !important;
+    }
+    /* Forces inner divs to not get theme link borders */
+    .project-card div {
+        text-decoration: none !important;
+        border-bottom: none !important;
+    }
+    .carousel-mode .project-card { max-width: 380px; margin: 0 auto; }
+    .gallery-mode .project-card { max-width: 100%; margin: 0; }
+    .project-card:hover img { opacity: 0.85; transition: opacity 0.2s; }
+    
+    /* 1:1 Aspect Ratio Image */
+    .project-img {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid #e1e4e8;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    /* Topic Badges (Shown ONLY in "All" Carousel Mode) */
+    .card-topics { display: none; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .carousel-mode .card-topics { display: flex; }
+    .gallery-mode .card-topics { display: none; }
+    .topic-badge { background: #13294B; color: #ffffff; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px; letter-spacing: 0.3px; }
+
+    /* Navigation Arrows */
+    .nav-arrow {
+        position: absolute;
+        top: 35%; 
+        transform: translateY(-50%);
+        background: #f1f4f8;
+        color: #13294B;
+        border: 1px solid #d0d7de;
+        font-size: 18px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+        z-index: 10;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .nav-arrow:hover { background: #13294B; color: #ffffff; border-color: #13294B; }
+    #prev-btn { left: 0px; }
+    #next-btn { right: 0px; }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div style="background: #fdfdfe; border: 1px solid #e1e4e8; border-left: 4px solid #13294B; border-radius: 6px; padding: 20px 25px; margin: 25px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+    <h4 style="margin-top: 0; margin-bottom: 15px; color: #13294B; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">Research Topics</h4>
+    
+    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px dashed #e1e4e8;">
+        <button class="topic-btn active-topic" data-topic="All">All</button>
+        <button class="topic-btn" data-topic="Hierarchical RL">Hierarchical RL</button>
+        <button class="topic-btn" data-topic="Safe RL">Safe RL</button>
+        <button class="topic-btn" data-topic="Meta-RL">Meta-RL</button>
+        <button class="topic-btn" data-topic="Offline RL">Offline RL</button>
+    </div>
+
+    <div id="gallery-wrapper" style="position: relative; padding: 0 50px; min-height: 400px;">
+        
+        <button id="prev-btn" class="nav-arrow">&#10094;</button>
+        <button id="next-btn" class="nav-arrow">&#10095;</button>
+
+        <div id="project-gallery" class="carousel-mode">
+            
+            <a href="/publication/2026-01-30-IRPO" class="project-card" data-topics="All,Hierarchical RL">
+                <img src="/files/IRPO/pointmazev1.gif" alt="IRPO" class="project-img">
+                <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">Intrinsic Reward Policy Optimization (IRPO)</div>
+                <div style="font-size: 11px; font-weight: 600; color: #57606a; background: #f1f4f8; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #d0d7de;">Algorithm for Sparse-Reward Navigations.</div>
+                <div class="card-topics">
+                    <span style="font-size: 12px; font-weight: 700; color: #24292e; margin-right: 4px;">Topics:</span>
+                    <span class="topic-badge">Hierarchical RL</span>
                 </div>
-            </div>
-        </div>
+            </a>
 
-        <div class="research-tag-container">
-            <a href="/publications/?tag=Safe RL" class="research-tag">Safe RL</a>
-            <div class="tag-popup" style="width: max-content; max-width: 85vw; padding: 15px;">
-                
-                <div style="display: flex; gap: 15px; align-items: stretch;">
-                    
-                <a href="/publication/your-third-paper-url" class="popup-link" style="width: 230px; display: flex; flex-direction: column; text-decoration: none;">
-                    <img src="/files/Sparsity/sparsity.png" alt="Sparsity" style="width: 100%; height: 160px; object-fit: cover; border-radius: 4px; border: 1px solid #e1e4e8; margin-bottom: 8px;">
-                    <div style="font-size: 12px; font-weight: 700; line-height: 1.3; color: #13294B; flex-grow: 1;">Sparsity-based Safety Conservatism</div>
-                    <div style="font-size: 10px; color: #57606a; margin-top: 4px; background: #f1f4f8; padding: 2px 6px; border-radius: 4px; display: inline-block;">Data Sparsity for Safety Overestimation</div>
-                </a>
-
-                <div style="width: 1px; background: #eee; align-self: stretch;"></div>
-
-                <a href="/publication/2025-05-28-CAC" class="popup-link" style="width: 230px; display: flex; flex-direction: column; text-decoration: none;">
-                    <img src="/files/CAC/carl.gif" alt="CAC" style="width: 100%; height: 160px; object-fit: cover; border-radius: 4px; border: 1px solid #e1e4e8; margin-bottom: 8px;">
-                    <div style="font-size: 12px; font-weight: 700; line-height: 1.3; color: #13294B; flex-grow: 1;">Contraction Actor-Critic (CAC)</div>
-                    <div style="font-size: 10px; color: #57606a; margin-top: 4px; background: #f1f4f8; padding: 2px 6px; border-radius: 4px; display: inline-block;">Certifiable and Robust RL for Path-Tracking</div>
-                </a>
-
-                <div style="width: 1px; background: #eee; align-self: stretch;"></div>
-
-                <a href="/publication/2024-03-24-META_CPO" class="popup-link" style="width: 230px; display: flex; flex-direction: column; text-decoration: none;">
-                    <img src="/files/META_CPO/META_CPO.gif" alt="META_CPO" style="width: 100%; height: 160px; object-fit: cover; border-radius: 4px; border: 1px solid #e1e4e8; margin-bottom: 8px;">
-                    <div style="font-size: 12px; font-weight: 700; line-height: 1.3; color: #13294B; flex-grow: 1;">Constrained Meta-RL (Meta-CPO)</div>
-                    <div style="font-size: 10px; color: #57606a; margin-top: 4px; background: #f1f4f8; padding: 2px 6px; border-radius: 4px; display: inline-block;">Adaptable Safety Guarantees for Unseen Tasks</div>
-                </a>
-
+            <a href="/publication/2024-12-16-HIMETA" class="project-card" data-topics="All,Hierarchical RL,Meta-RL">
+                <img src="/files/HIMETA/himeta.gif" alt="HIMETA" class="project-img">
+                <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">Hierarchical meta-reinforcement learning (HiMeta)</div>
+                <div style="font-size: 11px; font-weight: 600; color: #57606a; background: #f1f4f8; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #d0d7de;">Adapting to Out-Of-Distributional Tasks</div>
+                <div class="card-topics">
+                    <span style="font-size: 12px; font-weight: 700; color: #24292e; margin-right: 4px;">Topics:</span>
+                    <span class="topic-badge">Hierarchical RL</span>
+                    <span class="topic-badge">Meta-RL</span>
                 </div>
-            </div>
-        </div>
+            </a>
 
-        <div class="research-tag-container">
-            <a href="/publications/?tag=Meta-RL" class="research-tag">Meta-RL</a>
-            <div class="tag-popup" style="width: max-content; max-width: 85vw; padding: 15px;">
-                <div style="display: flex; gap: 15px; align-items: stretch;">
-                    <a href="/publication/2024-12-16-HIMETA" class="popup-link" style="width: 230px; display: flex; flex-direction: column; text-decoration: none;">
-                        <img src="/files/HIMETA/himeta.gif" alt="HiMeta" style="width: 100%; height: 160px; object-fit: cover; border-radius: 4px; border: 1px solid #e1e4e8; margin-bottom: 8px;">
-                        <div style="font-size: 12px; font-weight: 700; line-height: 1.3; color: #13294B; flex-grow: 1;">Hierarchical Meta-RL (HiMeta)</div>
-                        <div style="font-size: 10px; color: #57606a; margin-top: 4px; background: #f1f4f8; padding: 2px 6px; border-radius: 4px; display: inline-block;">Adapting to Out-Of-Distributional Tasks</div>
-                    </a>
-                    <div style="width: 1px; background: #eee; align-self: stretch;"></div>
-                    <a href="/publication/2024-03-24-META_CPO" class="popup-link" style="width: 230px; display: flex; flex-direction: column; text-decoration: none;">
-                        <img src="/files/META_CPO/META_CPO.gif" alt="Meta-CPO" style="width: 100%; height: 160px; object-fit: cover; border-radius: 4px; border: 1px solid #e1e4e8; margin-bottom: 8px;">
-                        <div style="font-size: 12px; font-weight: 700; line-height: 1.3; color: #13294B; flex-grow: 1;">Constrained Meta-RL (Meta-CPO)</div>
-                        <div style="font-size: 10px; color: #57606a; margin-top: 4px; background: #f1f4f8; padding: 2px 6px; border-radius: 4px; display: inline-block;">Adaptable Safety Guarantees for Unseen Tasks</div>
-                    </a>
+            <a href="/publication/your-third-paper-url" class="project-card" data-topics="All,Safe RL">
+                <img src="/files/Sparsity/sparsity.png" alt="Sparsity" class="project-img">
+                <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">Sparsity-based Safety Conservatism</div>
+                <div style="font-size: 11px; font-weight: 600; color: #57606a; background: #f1f4f8; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #d0d7de;">Data Sparsity for Safety Overestimation</div>
+                <div class="card-topics">
+                    <span style="font-size: 12px; font-weight: 700; color: #24292e; margin-right: 4px;">Topics:</span>
+                    <span class="topic-badge">Safe RL</span>
                 </div>
-            </div>
-        </div>
+            </a>
 
-        <div class="research-tag-container">
-            <a href="/publications/?tag=Offline RL" class="research-tag">Offline RL</a>
-            <div class="tag-popup" style="width: max-content; max-width: 85vw; padding: 15px;">
-                <div style="display: flex; gap: 15px; align-items: stretch;">
-                    <a href="/publication/2025-11-30-MOOD_CRL" class="popup-link" style="width: 230px; display: flex; flex-direction: column; text-decoration: none;">
-                        <img src="/files/MOOD_CRL/walker_distribution.png" alt="MOOD-CRL" style="width: 100%; height: 160px; object-fit: cover; border-radius: 4px; border: 1px solid #e1e4e8; margin-bottom: 8px;">
-                        <div style="font-size: 12px; font-weight: 700; line-height: 1.3; color: #13294B; flex-grow: 1;">OOD Adaptation in Offline RL</div>
-                        <div style="font-size: 10px; color: #57606a; margin-top: 4px; background: #f1f4f8; padding: 2px 6px; border-radius: 4px; display: inline-block;">Using Causal Normalizing Flows for Offline RL</div>
-                    </a>
+            <a href="/publication/2025-05-28-CAC" class="project-card" data-topics="All,Safe RL">
+                <img src="/files/CAC/carl.gif" alt="CAC" class="project-img">
+                <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">Contraction Actor-Critic (CAC)</div>
+                <div style="font-size: 11px; font-weight: 600; color: #57606a; background: #f1f4f8; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #d0d7de;">Certifiable and Robust RL for Path-Tracking</div>
+                <div class="card-topics">
+                    <span style="font-size: 12px; font-weight: 700; color: #24292e; margin-right: 4px;">Topics:</span>
+                    <span class="topic-badge">Safe RL</span>
                 </div>
-            </div>
+            </a>
+
+            <a href="/publication/2024-03-24-META_CPO" class="project-card" data-topics="All,Safe RL,Meta-RL">
+                <img src="/files/META_CPO/META_CPO.gif" alt="META_CPO" class="project-img">
+                <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">Constrained Meta-RL (Meta-CPO)</div>
+                <div style="font-size: 11px; font-weight: 600; color: #57606a; background: #f1f4f8; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #d0d7de;">Adaptable Safety Guarantees for Unseen Tasks</div>
+                <div class="card-topics">
+                    <span style="font-size: 12px; font-weight: 700; color: #24292e; margin-right: 4px;">Topics:</span>
+                    <span class="topic-badge">Safe RL</span>
+                    <span class="topic-badge">Meta-RL</span>
+                </div>
+            </a>
+
+            <a href="/publication/2025-11-30-MOOD_CRL" class="project-card" data-topics="All,Offline RL">
+                <img src="/files/MOOD_CRL/walker_distribution.png" alt="MOOD-CRL" class="project-img">
+                <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">OOD Adaptation in Offline RL</div>
+                <div style="font-size: 11px; font-weight: 600; color: #57606a; background: #f1f4f8; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #d0d7de;">Using Causal Normalizing Flows for Offline RL</div>
+                <div class="card-topics">
+                    <span style="font-size: 12px; font-weight: 700; color: #24292e; margin-right: 4px;">Topics:</span>
+                    <span class="topic-badge">Offline RL</span>
+                </div>
+            </a>
         </div>
     </div>
 
-    <p style="margin: 0; font-size: 13px; color: #57606a; border-top: 1px solid #e1e4e8; padding-top: 12px;">
-        <em>Hover over any keyword for a preview, or click to explore <a href="/publications/" style="font-weight: 600; color: #13294B; text-decoration: underline;">all publications</a>.</em>
+    <p style="margin: 20px 0 0 0; font-size: 13px; color: #57606a; border-top: 1px solid #e1e4e8; padding-top: 12px; text-align: center;">
+        <em>Click a topic to filter, or explore <a href="/publications/" style="font-weight: 600; color: #13294B; text-decoration: underline;">all publications</a>.</em>
     </p>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let slideInterval;
+        let currentIndex = 0;
+        const gallery = document.getElementById('project-gallery');
+        const projects = document.querySelectorAll('.project-card');
+        const buttons = document.querySelectorAll('.topic-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        // Show a single slide (used in "All" mode)
+        function showCarouselSlide() {
+            projects.forEach(p => p.style.display = 'none');
+            if (projects.length > 0) {
+                projects[currentIndex].style.display = 'flex';
+            }
+        }
+
+        function nextSlide() {
+            currentIndex = (currentIndex + 1) % projects.length;
+            showCarouselSlide();
+        }
+
+        function prevSlide() {
+            currentIndex = (currentIndex - 1 + projects.length) % projects.length;
+            showCarouselSlide();
+        }
+
+        // Arrow Click Listeners
+        prevBtn.addEventListener('click', () => {
+            clearInterval(slideInterval);
+            prevSlide();
+            slideInterval = setInterval(nextSlide, 3500); // Restart auto-rotation
+        });
+
+        nextBtn.addEventListener('click', () => {
+            clearInterval(slideInterval);
+            nextSlide();
+            slideInterval = setInterval(nextSlide, 3500); // Restart auto-rotation
+        });
+
+        // Main filter function
+        function filterProjects(topic) {
+            clearInterval(slideInterval);
+
+            if (topic === 'All') {
+                // BEHAVIOR 1: Single Item Auto-Rotating Carousel with Arrows
+                gallery.className = 'carousel-mode';
+                prevBtn.style.display = 'flex';
+                nextBtn.style.display = 'flex';
+                currentIndex = 0;
+                showCarouselSlide();
+                slideInterval = setInterval(nextSlide, 3500); 
+            } else {
+                // BEHAVIOR 2: Grid Layout without arrows (fits 2 side-by-side)
+                gallery.className = 'gallery-mode';
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+                projects.forEach(project => {
+                    if (project.getAttribute('data-topics').includes(topic)) {
+                        project.style.display = 'flex';
+                    } else {
+                        project.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        // Filter Button Click Listeners
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                buttons.forEach(b => b.classList.remove('active-topic'));
+                this.classList.add('active-topic');
+                filterProjects(this.getAttribute('data-topic'));
+            });
+        });
+
+        // Initialize with 'All' Mode on load
+        filterProjects('All');
+    });
+</script>
 
 <h2 style="color: #13294B; border-bottom: 1px solid #e1e4e8; padding-bottom: 10px;">📢 Recent News</h2>
 <ul style="line-height: 1.6; font-size: 16px;">
@@ -191,13 +347,3 @@ redirect_from:
     <a href="https://linkedin.com/in/mj-minjae-cho-407b9a224" style="text-decoration: none; color: #13294B;" target="_blank">LinkedIn</a> &nbsp;•&nbsp; 
     <a href="https://github.com/mgineer117" style="text-decoration: none; color: #13294B;" target="_blank">GitHub</a>
 </div>
-
-<style>
-    .research-tag-container { position: relative; display: inline-block; vertical-align: middle; }
-    .research-tag { display: inline-block; background: #eef2f7; color: #13294B; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 20px; border: 1px solid #d0d7de; line-height: 1.2; transition: all 0.2s ease; text-decoration: none; }
-    .research-tag-container:hover .research-tag { background: #13294B; color: #ffffff; border-color: #13294B; }
-    .tag-popup { visibility: hidden; opacity: 0; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #ffffff; border: 1px solid #e1e4e8; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 100; transition: all 0.2s ease-in-out; }
-    .research-tag-container:hover .tag-popup { visibility: visible; opacity: 1; bottom: calc(100% + 12px); }
-    .popup-link { text-decoration: none; color: inherit; display: block; transition: opacity 0.2s; }
-    .popup-link:hover { opacity: 0.7; }
-</style>

@@ -113,5 +113,67 @@ author_profile: true
 </div>
 
 <script>
-  /* Your existing filtering script goes here */
+  document.addEventListener("DOMContentLoaded", function() {
+    const buttons = document.querySelectorAll('.tag-filter-btn');
+    const cards = document.querySelectorAll('.publication-card');
+    const categories = document.querySelectorAll('.category-section');
+
+    function filterPapers(selectedTag) {
+      // 1. Show or hide individual cards based on the tag
+      cards.forEach(card => {
+        const cardTags = card.getAttribute('data-tags') || "";
+        
+        // If 'All' is selected, or if the card's tags include the selected tag
+        if (selectedTag === 'all' || cardTags.includes(selectedTag)) {
+          card.style.setProperty('display', 'flex', 'important');
+        } else {
+          card.style.setProperty('display', 'none', 'important');
+        }
+      });
+
+      // 2. Hide entire category sections (like "Journal Articles") if they are empty
+      categories.forEach(category => {
+        const visibleCards = Array.from(category.querySelectorAll('.publication-card'))
+                                  .filter(c => c.style.display !== 'none');
+        
+        if (visibleCards.length === 0) {
+          category.style.setProperty('display', 'none', 'important');
+        } else {
+          category.style.setProperty('display', 'block', 'important');
+        }
+      });
+    }
+
+    // Check if someone loaded the page with a specific URL tag (e.g., ?tag=Safe RL)
+    const urlParams = new URLSearchParams(window.location.search);
+    const tagFromUrl = urlParams.get('tag');
+    
+    if (tagFromUrl) {
+      buttons.forEach(b => {
+        if (b.getAttribute('data-tag') === tagFromUrl) {
+          buttons.forEach(btn => btn.classList.remove('active-tag'));
+          b.classList.add('active-tag');
+          filterPapers(tagFromUrl);
+        }
+      });
+    }
+
+    // Make the buttons clickable
+    buttons.forEach(button => {
+      button.addEventListener('click', function() {
+        // Change button colors
+        buttons.forEach(b => b.classList.remove('active-tag'));
+        this.classList.add('active-tag');
+        
+        // Run the filter
+        const selectedTag = this.getAttribute('data-tag');
+        
+        // Update the URL so it can be shared
+        const newUrl = selectedTag === 'all' ? window.location.pathname : window.location.pathname + '?tag=' + encodeURIComponent(selectedTag);
+        window.history.pushState({}, '', newUrl);
+
+        filterPapers(selectedTag);
+      });
+    });
+  });
 </script>
