@@ -225,7 +225,7 @@ redirect_from:
             </a>
 
             <a href="{{ site.baseurl }}/publication/2024-03-24-META_CPO" class="project-card" data-topics="All,Safe RL,Meta-RL">
-                <img src="{{ site.baseurl }}/files/META_CPO/META_CPO.gif" alt="META_CPO" class="project-img">
+                <img src="{{ site.baseurl }}/files/META_CPO/Meta_CPO.gif" alt="META_CPO" class="project-img">
                 <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">Constrained Meta-RL (Meta-CPO)</div>
                 <div style="font-size: 11px; font-weight: 600; color: #57606a; background: #f1f4f8; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #d0d7de;">Adaptable Safety Guarantees for Unseen Tasks</div>
                 <div class="card-topics">
