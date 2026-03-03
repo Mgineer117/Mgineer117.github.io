@@ -30,7 +30,7 @@
 
       {% if post.excerpt %}
         <p style="font-size: 16px; color: #24292e; margin-bottom: 15px; line-height: 1.6; text-align: justify;">
-          {{ post.excerpt | strip_html }}
+          <strong>TL;DR:</strong> {{ post.excerpt | strip_html }}
         </p>
       {% endif %}
 
