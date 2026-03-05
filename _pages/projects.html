@@ -51,6 +51,32 @@ author_profile: true
     clear: both !important;
     margin-top: 30px;
   }
+
+  /* --- MOBILE RESPONSIVENESS FIX --- */
+  @media (max-width: 768px) {
+    .project-card {
+      flex-direction: column !important; /* Stack GIF on top of text */
+      align-items: center !important;
+      gap: 15px !important; /* Reduce gap for mobile */
+    }
+
+    .teaser-wrapper {
+      flex: 0 0 auto !important; /* Remove the fixed width desktop restriction */
+      width: 100% !important;
+      max-width: 400px; /* Optional: keeps the GIF from becoming too giant */
+    }
+
+    .card-text-content {
+      width: 100% !important;
+      text-align: left; /* Keep text aligned left even if card centers */
+    }
+    
+    #tag-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+  }
 </style>
 
 <div id="tag-filters" style="width: 100%; clear: both; margin-bottom: 20px; padding-bottom: 10px;">
