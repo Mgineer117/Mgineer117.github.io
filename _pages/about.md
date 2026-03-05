@@ -43,16 +43,68 @@ redirect_from:
     </div>
 </div>
 
+<style>
+    /* Career Timeline Mobile Fix */
+    .timeline-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        background: #fdfdfe;
+        border: 1px solid #e1e4e8;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .timeline-date {
+        width: 140px;
+        flex-shrink: 0;
+        font-weight: 700;
+        color: #57606a;
+        font-family: monospace;
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+    .timeline-logo {
+        width: 50px;
+        flex-shrink: 0;
+    }
+
+    .timeline-content {
+        flex: 1;
+    }
+
+    /* Stack vertically on screens smaller than 650px */
+    @media (max-width: 650px) {
+        .timeline-item {
+            flex-direction: column !important;
+            gap: 12px !important;
+            padding: 15px !important;
+        }
+        .timeline-date {
+            width: 100% !important;
+            border-bottom: 1px dashed #e1e4e8;
+            padding-bottom: 8px;
+            margin-bottom: 5px;
+        }
+        .timeline-logo {
+            width: 45px !important;
+        }
+    }
+</style>
+
 <h2 style="color: #13294B; border-bottom: 1px solid #e1e4e8; padding-bottom: 10px;">🗓️ Career Timeline</h2>
 <div style="display: flex; flex-direction: column; gap: 20px; margin: 25px 0 40px 0;">
-    <div style="display: flex; align-items: flex-start; gap: 20px; background: #fdfdfe; border: 1px solid #e1e4e8; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-        <div style="width: 140px; flex-shrink: 0; font-weight: 700; color: #57606a; font-family: monospace; font-size: 14px; margin-top: 4px;">
+    
+    <div class="timeline-item">
+        <div class="timeline-date">
             2024.07 – <span style="color: #13294B;">Present</span>
         </div>
-        <div style="width: 50px; flex-shrink: 0;">
+        <div class="timeline-logo">
             <img src="{{ site.baseurl }}/files/UIUC_logo.png" alt="UIUC" style="width: 100%; max-height: 50px; object-fit: contain;">
         </div>
-        <div style="flex: 1;">
+        <div class="timeline-content">
             <h4 style="margin: 0; color: #13294B; font-size: 18px; font-weight: 700;">Ph.D. Student</h4>
             <p style="margin: 4px 0 0 0; font-size: 16px; color: #24292e; line-height: 1.5;">
                 <strong>University of Illinois Urbana-Champaign</strong><br>
@@ -61,14 +113,14 @@ redirect_from:
         </div>
     </div>
 
-    <div style="display: flex; align-items: flex-start; gap: 20px; background: #fdfdfe; border: 1px solid #e1e4e8; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-        <div style="width: 140px; flex-shrink: 0; font-weight: 700; color: #57606a; font-family: monospace; font-size: 14px; margin-top: 4px;">
+    <div class="timeline-item">
+        <div class="timeline-date">
             2019.08 – 2024.06
         </div>
-        <div style="width: 50px; flex-shrink: 0;">
+        <div class="timeline-logo">
             <img src="{{ site.baseurl }}/files/Msstate_logo.png" alt="MSState" style="width: 100%; max-height: 50px; object-fit: contain;">
         </div>
-        <div style="flex: 1;">
+        <div class="timeline-content">
             <h4 style="margin: 0; color: #13294B; font-size: 18px; font-weight: 700;">Student</h4>
             <p style="margin: 4px 0 0 0; font-size: 16px; color: #24292e; line-height: 1.5;">
                 <strong>Mississippi State University</strong><br>
