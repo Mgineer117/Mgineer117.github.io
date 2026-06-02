@@ -17,4 +17,33 @@
 <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
+<!-- Google Fonts: Inter -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Custom Micro-animations -->
+<style>
+  /* Add subtle lift to cards on hover */
+  .archive__item {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .archive__item:hover {
+    transform: translateY(-2px);
+  }
+  /* Modernize button feel */
+  .btn {
+    transition: all 0.2s ease;
+    border-radius: 6px;
+  }
+  .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  /* Smooth link colors */
+  a {
+    transition: color 0.15s ease-in-out;
+  }
+</style>
+
 <!-- end custom head snippets -->
