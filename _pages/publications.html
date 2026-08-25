@@ -89,12 +89,13 @@ author_profile: true
 {% include base_path %}
 
 <div id="publications-container" markdown="0">
-  {% assign category_order = "preprints,conferences,journals" | split: "," %}
+  {% assign category_order = "journals,conferences,preprints" | split: "," %}
+  {% assign sorted_pubs = site.publications | sort: "date" | reverse %}
 
   {% for cat_id in category_order %}
     <div class="category-section" id="section-{{ cat_id }}">
       {% assign title_shown = false %}
-      {% for post in site.publications reversed %}
+      {% for post in sorted_pubs %}
         {% if post.category == cat_id %}
           {% unless title_shown %}
             <h2 class="category-header" style="color: #13294B; margin-top: 40px; clear: both; border-bottom: 2px solid #e1e4e8; padding-bottom: 10px;">
