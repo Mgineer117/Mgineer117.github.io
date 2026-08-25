@@ -267,9 +267,9 @@ redirect_from:
             </a>
 
             <a href="{{ site.baseurl }}/publication/2025-05-28-CAC" class="project-card" data-topics="All,Safe RL">
-                <img src="{{ site.baseurl }}/files/CAC/carl.gif" alt="CAC" class="project-img">
-                <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">Contraction Actor-Critic (CAC)</div>
-                <div style="font-size: 11px; font-weight: 600; color: #57606a; background: #f1f4f8; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #d0d7de;">Certifiable and Robust RL for Path-Tracking</div>
+                <img src="{{ site.baseurl }}/files/CAC/carl.gif" alt="CARL" class="project-img">
+                <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">Contraction-Aware RL (CARL)</div>
+                <div style="font-size: 11px; font-weight: 600; color: #57606a; background: #f1f4f8; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #d0d7de;">Statistically Robust RL for Nonlinear Control</div>
                 <div class="card-topics">
                     <span style="font-size: 12px; font-weight: 700; color: #24292e; margin-right: 4px;">Topics:</span>
                     <span class="topic-badge">Safe RL</span>
