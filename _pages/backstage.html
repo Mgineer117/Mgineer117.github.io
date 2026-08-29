@@ -1,0 +1,67 @@
+---
+layout: single
+title: "Backstage"
+permalink: /backstage/
+author_profile: false
+sitemap: false
+---
+
+{% include base_path %}
+
+<div class="mx" id="mx">
+
+  <script type="application/json" id="mx-config">
+    {
+      "apiKey": {{ site.firebase.apiKey | default: "" | jsonify }},
+      "authDomain": {{ site.firebase.authDomain | default: "" | jsonify }},
+      "projectId": {{ site.firebase.projectId | default: "" | jsonify }},
+      "appId": {{ site.firebase.appId | default: "" | jsonify }},
+      "storageBucket": {{ site.firebase.storageBucket | default: "" | jsonify }},
+      "messagingSenderId": {{ site.firebase.messagingSenderId | default: "" | jsonify }},
+      "collection": {{ site.firebase.collection | default: "comments" | jsonify }},
+      "guestDomain": {{ site.firebase.guestDomain | default: "guests.invalid" | jsonify }},
+      "owner": {{ site.firebase.owner | default: "site-owner" | jsonify }},
+      "ownerName": {{ site.firebase.ownerName | default: site.author.name | default: "Author" | jsonify }}
+    }
+  </script>
+
+  <form class="mx__gate" id="mx-gate" novalidate>
+    <label class="cbox__field">
+      <span>Master password</span>
+      <input type="password" id="mx-pass" autocomplete="current-password"
+             minlength="4" placeholder="&#183;&#183;&#183;&#183;&#183;&#183;&#183;&#183;">
+    </label>
+    <button type="submit" class="btn-x btn-x--sm" disabled>Enter master mode</button>
+    <p class="cbox__hint">
+      Master mode is a sign-in, not a switch: it unlocks nothing this browser
+      could have taken on its own. While it is open, every comment box on the
+      site loses its password prompts and gains a &ldquo;Reply as author&rdquo; action.
+    </p>
+  </form>
+
+  <p class="cbox__error" id="mx-error" role="alert" hidden></p>
+  <p class="cbox__error" id="mx-stranger" role="alert" hidden></p>
+
+  <div class="mx__panel" id="mx-panel" hidden>
+    <div class="mx__bar">
+      <span>Master mode &mdash; <b id="mx-who"></b></span>
+      <span class="cbox__count" id="mx-count"></span>
+      <button type="button" class="cbox__linkbtn" id="mx-signout">Leave master mode</button>
+    </div>
+
+    <p class="cbox__status" id="mx-status" role="status" aria-live="polite"></p>
+
+    <div class="mx__list" id="mx-list"></div>
+
+    <form class="mx__pw" id="mx-pwform" novalidate>
+      <label class="cbox__field">
+        <span>Change master password</span>
+        <input type="password" id="mx-newpass" autocomplete="new-password"
+               minlength="4" placeholder="At least 4 characters">
+      </label>
+      <button type="submit" class="btn-x btn-x--sm">Change it</button>
+    </form>
+  </div>
+</div>
+
+<script type="module" src="{{ base_path }}/assets/js/master.js"></script>

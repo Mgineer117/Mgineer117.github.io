@@ -99,6 +99,10 @@ firebase:
   # Commenters only ever type a name; it is mapped to name@<guestDomain>
   # internally so Firebase Auth can hold the password. Nothing is emailed.
   guestDomain            : "guests.mgineer117.github.io"
+  # Master mode: the owner account is an ordinary comment identity whose uid is
+  # listed in the Firestore `admins` collection. Sign in at the path below.
+  owner                  : "site-owner"
+  ownerName              : "Minjae Cho"
 
 # Site Settings
 teaser                   :  # filename of teaser fallback teaser image placed in /images/, .e.g. "500x300.png"
