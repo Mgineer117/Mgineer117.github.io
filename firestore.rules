@@ -25,12 +25,31 @@ service cloud.firestore {
 
     function shapeOk() {
       let d = request.resource.data;
-      return d.keys().hasAll(['page', 'name', 'uid', 'body', 'createdAt'])
-          && d.keys().hasOnly(['page', 'name', 'uid', 'body', 'createdAt', 'updatedAt'])
+      return d.keys().hasAll(['page', 'name', 'uid', 'body', 'private', 'createdAt'])
+          && d.keys().hasOnly(['page', 'name', 'uid', 'body', 'private', 'createdAt', 'updatedAt'])
           && d.page is string && d.page.size() > 0    && d.page.size() <= 200
           && d.name is string && d.name.size() > 0    && d.name.size() <= 40
           && d.body is string && d.body.size() > 0    && d.body.size() <= 4000
+          && d.private is bool
           && d.uid  is string && d.uid == request.auth.uid;
+    }
+
+    // A private comment is legible only to the person who wrote it and to the
+    // owner. Firestore rejects a whole query if any matching document fails
+    // this, so the page asks for public comments and for its own private ones
+    // as separate, individually-provable queries. The cheap tests come first:
+    // a public comment never triggers the /admins lookup.
+    //
+    // Do not rewrite the first line as resource.data.get('private', false).
+    // Reading the field through get() with a default made every document
+    // evaluate as if it were public, and an unfiltered list then returned
+    // private bodies to anonymous callers. Plain field access is what actually
+    // denies. A document with no `private` field fails this and stays hidden,
+    // which is the safe direction; create requires the field, so there are none.
+    function readable() {
+      return resource.data.private == false
+          || (isSignedIn() && resource.data.uid == request.auth.uid)
+          || isAdmin();
     }
 
     // Public so the page can tell whether the current visitor is an owner.
@@ -43,7 +62,7 @@ service cloud.firestore {
 
     match /comments/{commentId} {
 
-      allow read: if true;
+      allow read: if readable();
 
       allow create: if isSignedIn()
                     && shapeOk()

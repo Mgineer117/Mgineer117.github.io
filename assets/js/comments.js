@@ -6,6 +6,12 @@
    stored by this site: Firebase does the hashing, and Firestore rules decide
    who may edit or delete. Re-entering the same pair signs you back in, which
    is what lets you revise or remove what you wrote.
+
+   A comment can be public or private. Rules decide legibility per document,
+   and Firestore fails a whole query if a single matching document is off
+   limits, so the list is assembled from separate queries that are each
+   provably allowed: public comments for everyone, plus your own private ones,
+   or every private one if you are the owner.
    ========================================================================== */
 
 import { initializeApp }
@@ -60,6 +66,7 @@ async function boot() {
     form: $("cbox-form"), ids: $("cbox-ids"), hint: $("cbox-hint"),
     name: $("cbox-name"), pass: $("cbox-pass"), body: $("cbox-body"),
     submit: $("cbox-submit"), status: $("cbox-status"), error: $("cbox-error"),
+    private: $("cbox-private"), notice: $("cbox-notice"),
     who: $("cbox-who"), whoName: $("cbox-who-name"), admin: $("cbox-admin"),
     signout: $("cbox-signout"), list: $("cbox-list"), empty: $("cbox-empty"),
     count: $("cbox-count")
@@ -129,7 +136,7 @@ async function boot() {
       console.info("[comments] signed in as", u.displayName, "· uid:", u.uid);
     }
     paintAuth();
-    paintList();
+    startStreams();
   });
 
   function paintAuth() {
@@ -144,6 +151,22 @@ async function boot() {
       els.submit.textContent = "Post comment";
     }
   }
+
+  function paintNotice() {
+    const secret = els.private.checked;
+    els.notice.classList.toggle("cbox__notice--private", secret);
+    els.notice.textContent = "";
+    const lead = document.createElement("b");
+    lead.textContent = secret ? "This comment will be private." : "This comment will be public.";
+    els.notice.append(lead, document.createTextNode(secret
+      ? " Only you and the site owner will be able to read it. It stays hidden" +
+        " from everyone else visiting this page."
+      : " Anyone who opens this page can read the name you choose and everything" +
+        " you write, and search engines may index it. Please don\u2019t post" +
+        " anything you would not want quoted."));
+  }
+  els.private.addEventListener("change", paintNotice);
+  paintNotice();
 
   els.signout.addEventListener("click", async () => {
     await signOut(auth);
@@ -183,17 +206,19 @@ async function boot() {
         if (!name) throw new Error("Please enter a name.");
         who = await authenticate(name, els.pass.value);
       }
+      const secret = els.private.checked;
       await addDoc(col, {
         page: cfg.page,
         name: who.displayName || els.name.value.trim(),
         uid: who.uid,
         body: body,
+        private: secret,
         createdAt: serverTimestamp(),
         updatedAt: null
       });
       els.body.value = "";
       els.pass.value = "";
-      setStatus("Posted.");
+      setStatus(secret ? "Posted privately." : "Posted.");
     } catch (err) {
       setError(err && err.message ? err.message : "Could not post that comment.");
     } finally {
@@ -203,16 +228,58 @@ async function boot() {
 
   /* --------------------------------------------------------------- listing -- */
 
-  onSnapshot(
-    query(col, where("page", "==", cfg.page)),
-    (snap) => {
-      rows = [];
-      snap.forEach((d) => rows.push(Object.assign({ id: d.id }, d.data())));
-      rows.sort((a, b) => ms(a.createdAt) - ms(b.createdAt));
-      paintList();
-    },
-    (err) => fatal("Comments could not be loaded: " + err.message, true)
-  );
+  /* One stream per query, merged by document id. Keeping them apart is what
+     makes each one legal under the rules; a document can only arrive through
+     a query the reader was allowed to run. */
+  const streams = [];
+  const buckets = new Map();
+
+  function recombine() {
+    const merged = new Map();
+    buckets.forEach((bucket) => bucket.forEach((row, id) => merged.set(id, row)));
+    rows = Array.from(merged.values()).sort((a, b) => ms(a.createdAt) - ms(b.createdAt));
+    paintList();
+  }
+
+  function stream(key, q, onError) {
+    buckets.set(key, new Map());
+    streams.push(onSnapshot(q, (snap) => {
+      const bucket = new Map();
+      snap.forEach((d) => bucket.set(d.id, Object.assign({ id: d.id }, d.data())));
+      buckets.set(key, bucket);
+      recombine();
+    }, onError));
+  }
+
+  function startStreams() {
+    while (streams.length) {
+      const stop = streams.pop();
+      try { stop(); } catch (e) { /* already detached */ }
+    }
+    buckets.clear();
+    editingId = null;
+
+    stream("public",
+      query(col, where("page", "==", cfg.page), where("private", "==", false)),
+      (err) => fatal("Comments could not be loaded: " + err.message, true));
+
+    if (user) {
+      /* The owner sees every private note; everyone else sees only their own.
+         Both are equality-only queries, so no composite index is needed. */
+      const q = isAdmin
+        ? query(col, where("page", "==", cfg.page), where("private", "==", true))
+        : query(col, where("page", "==", cfg.page), where("private", "==", true),
+                where("uid", "==", user.uid));
+      stream("private", q, () => {
+        /* Losing the private stream must not take the public one down. */
+        buckets.delete("private");
+        recombine();
+      });
+    }
+    recombine();
+  }
+
+  startStreams();
 
   const ms = (ts) => (ts && typeof ts.toMillis === "function" ? ts.toMillis() : Number.MAX_SAFE_INTEGER);
 
@@ -248,6 +315,14 @@ async function boot() {
     meta.textContent = when(row.createdAt) + (row.updatedAt ? " · edited" : "");
 
     head.append(name, meta);
+
+    if (row.private) {
+      const tag = document.createElement("span");
+      tag.className = "cbox__tag";
+      tag.textContent = "private";
+      tag.title = "Visible only to its author and the site owner";
+      head.appendChild(tag);
+    }
 
     const body = document.createElement("p");
     body.className = "cbox__item-body";
@@ -299,6 +374,17 @@ async function boot() {
     area.maxLength = 4000;
     area.value = row.body || "";
 
+    /* Visibility is editable too, so a comment posted to the wrong audience
+       can be corrected without deleting and rewriting it. */
+    const secrecy = document.createElement("label");
+    secrecy.className = "cbox__check cbox__check--tight";
+    const secretBox = document.createElement("input");
+    secretBox.type = "checkbox";
+    secretBox.checked = !!row.private;
+    const secretText = document.createElement("span");
+    secretText.textContent = "Private — only the site owner can read this";
+    secrecy.append(secretBox, secretText);
+
     const tools = document.createElement("div");
     tools.className = "cbox__item-tools";
 
@@ -311,7 +397,11 @@ async function boot() {
       if (!text) return setError("A comment can't be empty — delete it instead.");
       save.disabled = true;
       try {
-        await updateDoc(doc(col, row.id), { body: text, updatedAt: serverTimestamp() });
+        await updateDoc(doc(col, row.id), {
+          body: text,
+          private: secretBox.checked,
+          updatedAt: serverTimestamp()
+        });
         editingId = null;
         setError("");
         setStatus("Saved.");
@@ -328,7 +418,7 @@ async function boot() {
     cancel.addEventListener("click", () => { editingId = null; paintList(); });
 
     tools.append(save, cancel);
-    li.append(area, tools);
+    li.append(area, secrecy, tools);
     return li;
   }
 }
