@@ -28,7 +28,8 @@
   var FIELDS = {
 
     /* home — trajectories contracting onto a reference path.
-       The pointer is a disturbance: push them off and watch them come back. */
+       The pointer acts as a second, moving reference: trajectories near it
+       break away and track it, then contract back once it leaves. */
     contract: {
       settle: 240,
       seed: function (W) {
@@ -54,7 +55,7 @@
           0.055 * Math.sin(x * 11.3 - t * 0.11);
       },
       step: function (st, dt, t, W, H, ptr) {
-        var R = Math.min(W, H) * 0.42;
+        var R = Math.min(W, H) * 0.46;
         for (var i = 0; i < st.agents.length; i++) {
           var a = st.agents[i];
           a.x += a.v * dt;
@@ -64,32 +65,37 @@
             a.nextKick = a.x + 0.4 + Math.random() * 0.7;
           }
 
-          if (ptr && ptr.active > 0.01) {            /* and one from the pointer */
-            var dx = a.x * W - ptr.x, dy = a.y * H - ptr.y;
+          /* inside the pointer's radius a trajectory tracks the pointer, and
+             the closer it gets the less the real reference holds it */
+          var hold = 1;
+          if (ptr && ptr.active > 0.01) {
+            var dx = ptr.x - a.x * W, dy = ptr.y - a.y * H;
             var d = Math.sqrt(dx * dx + dy * dy);
             if (d < R) {
               var f = (1 - d / R) * ptr.active;
-              a.y += (dy >= 0 ? 1 : -1) * f * f * 1.15 * dt;
-              a.x += f * f * 0.05 * dt;
+              a.y += (dy / H) * f * 3.8 * dt;
+              a.x += (dx / W) * f * 0.35 * dt;
+              hold = 1 - 0.88 * f;
             }
           }
 
-          a.y += (this.ref(a.x, t) - a.y) * (1 - Math.exp(-a.k * dt));
+          a.y += (this.ref(a.x, t) - a.y) * (1 - Math.exp(-a.k * hold * dt));
           a.y = Math.max(-0.2, Math.min(1.2, a.y));
           a.trail.push(a.x, a.y);
           if (a.trail.length > 64) a.trail.splice(0, 2);
           if (a.x > 1.12) st.agents[i] = this.spawn(false);
         }
       },
-      pulse: function (st, x, y, W, H) {
-        var R = Math.min(W, H) * 0.75;
+      pulse: function (st, x, y, W, H) {            /* a click gathers them in */
+        var R = Math.min(W, H) * 0.9;
         for (var i = 0; i < st.agents.length; i++) {
           var a = st.agents[i];
-          var dx = a.x * W - x, dy = a.y * H - y;
+          var dx = x - a.x * W, dy = y - a.y * H;
           var d = Math.sqrt(dx * dx + dy * dy);
           if (d < R) {
             var f = 1 - d / R;
-            a.y += (dy >= 0 ? 1 : -1) * f * 0.34;
+            a.y += (dy / H) * f * 0.9;
+            a.x += (dx / W) * f * 0.3;
             a.y = Math.max(-0.2, Math.min(1.2, a.y));
           }
         }
@@ -141,7 +147,8 @@
     },
 
     /* publications — streamlines through a turning phase field.
-       The pointer adds a local vortex; a click scatters it. */
+       Streamlines near the pointer spiral in and follow it; a click draws
+       them in hard. */
     flow: {
       settle: 200,
       angle: function (x, y, t, W, H) {
@@ -180,8 +187,10 @@
             var d = Math.sqrt(dx * dx + dy * dy);
             if (d > 0.5 && d < R) {
               var f = (1 - d / R) * ptr.active;
-              a.x += (-dy / d) * f * 78 * dt + (dx / d) * f * 26 * dt;   /* swirl + push out */
-              a.y += ( dx / d) * f * 78 * dt + (dy / d) * f * 26 * dt;
+              /* pull toward the pointer, with enough swirl to spiral rather
+                 than fall straight in */
+              a.x += (-dx / d) * f * 58 * dt + (-dy / d) * f * 82 * dt;
+              a.y += (-dy / d) * f * 58 * dt + ( dx / d) * f * 82 * dt;
             }
           }
 
@@ -193,16 +202,16 @@
           }
         }
       },
-      pulse: function (st, x, y, W, H) {
-        var R = Math.min(W, H) * 0.8;
+      pulse: function (st, x, y, W, H) {            /* a click draws them in */
+        var R = Math.min(W, H) * 0.95;
         for (var i = 0; i < st.agents.length; i++) {
           var a = st.agents[i];
-          var dx = a.x - x, dy = a.y - y;
+          var dx = x - a.x, dy = y - a.y;
           var d = Math.sqrt(dx * dx + dy * dy) || 1;
           if (d < R) {
-            var f = (1 - d / R) * 46;
-            a.x += (dx / d) * f;
-            a.y += (dy / d) * f;
+            var f = (1 - d / R) * 0.5;
+            a.x += dx * f;
+            a.y += dy * f;
             a.trail.length = 0;
           }
         }
@@ -472,22 +481,9 @@
       state = field.seed(W, H);
     }
 
-    /* the halo under the pointer, and the ring a click leaves behind — drawn
-       for every field so interactivity reads the same way across the site */
-    function drawPointer(dt) {
-      if (ptr.active > 0.015) {
-        ctx.beginPath();
-        ctx.arc(ptr.x, ptr.y, 26, 0, Math.PI * 2);
-        ctx.strokeStyle = "rgba(255,255,255," + (0.16 * ptr.active).toFixed(3) + ")";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(ptr.x, ptr.y, 2, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(255,255,255," + (0.4 * ptr.active).toFixed(3) + ")";
-        ctx.fill();
-      }
-
+    /* No cursor marker: what the field does around the pointer is the
+       indicator. A click still leaves one expanding ring as confirmation. */
+    function drawRings(dt) {
       for (var i = ptr.rings.length - 1; i >= 0; i--) {
         var r = ptr.rings[i];
         r.age += dt;
@@ -504,7 +500,7 @@
     function paint(dt) {
       ctx.clearRect(0, 0, W, H);
       field.draw(ctx, state, t, W, H, ptr);
-      drawPointer(dt);
+      drawRings(dt);
     }
 
     var last = 0;
