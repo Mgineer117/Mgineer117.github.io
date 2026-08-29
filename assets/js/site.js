@@ -393,6 +393,167 @@
 
     /* blog — one continuous curve drawn like a plotter. The pen follows the
        pointer; a click changes the figure it is drawing. */
+    /* publication / project / teaching detail pages — a lattice under load.
+       Every other field here is loose particles; this one is a connected
+       sheet, so the interaction reads as deformation rather than drift. Nodes
+       are sprung to a rest grid and pulled toward the pointer, and a click
+       sends a ring travelling outward through the mesh. Where the sheet is
+       stretched it brightens, so the shape of the disturbance is the only
+       cursor the page needs. */
+    lattice: {
+      settle: 60,
+      seed: function (W, H) {
+        var sp = Math.max(44, Math.min(72, W / 24));
+        var cols = Math.ceil(W / sp) + 1;
+        var rows = Math.ceil(H / sp) + 1;
+        var ox = (W - (cols - 1) * sp) / 2;
+        var oy = (H - (rows - 1) * sp) / 2;
+        var nodes = [];
+        for (var r = 0; r < rows; r++) {
+          for (var c = 0; c < cols; c++) {
+            var rx = ox + c * sp, ry = oy + r * sp;
+            nodes.push({
+              rx: rx, ry: ry, x: rx, y: ry, vx: 0, vy: 0,
+              ph: (c * 0.55 + r * 0.9)          /* keeps the idle drift from marching in step */
+            });
+          }
+        }
+        return { nodes: nodes, cols: cols, rows: rows, sp: sp, drops: [] };
+      },
+
+      step: function (st, dt, t, W, H, ptr) {
+        var R = ptr ? ptr.r : Math.min(W, H) * 0.6;
+        var drops = st.drops;
+
+        for (var i = drops.length - 1; i >= 0; i--) {
+          drops[i].age += dt;
+          if (drops[i].age > 2.4) drops.splice(i, 1);
+        }
+
+        var K = 26;                                   /* spring back to rest  */
+        var damp = Math.exp(-5.2 * dt);
+        var band = st.sp * 1.5;
+
+        for (var n = 0; n < st.nodes.length; n++) {
+          var a = st.nodes[n];
+          var fx = 0, fy = 0;
+
+          /* the pointer is a weight on the sheet: nearby nodes lean into it */
+          if (ptr && ptr.active > 0.01) {
+            var dx = ptr.x - a.rx, dy = ptr.y - a.ry;
+            var d = Math.sqrt(dx * dx + dy * dy);
+            if (d > 0.5 && d < R) {
+              var w = (1 - d / R);
+              w = w * w * ptr.active;
+              fx += (dx / d) * w * 950;
+              fy += (dy / d) * w * 950;
+            }
+          }
+
+          /* a click travels outward as a ring of displacement */
+          for (var k = 0; k < drops.length; k++) {
+            var dr = drops[k];
+            var ex = a.rx - dr.x, ey = a.ry - dr.y;
+            var ed = Math.sqrt(ex * ex + ey * ey) || 1;
+            var ring = dr.age * 460;
+            var off = (ed - ring) / band;
+            var amp = Math.exp(-off * off) * Math.exp(-dr.age * 1.5);
+            if (amp > 0.002) {
+              fx += (ex / ed) * amp * 1500;
+              fy += (ey / ed) * amp * 1500;
+            }
+          }
+
+          /* A travelling swell so the sheet is never completely still. The
+             phase comes from rest position, not from the node index, so it
+             reads as one wave crossing the mesh instead of per-node jitter.
+             Amplitude lands near force/K pixels, the spring being stiff
+             relative to how slowly this term turns over. */
+          fx += Math.sin(t * 0.50 + a.rx * 0.0090 + a.ry * 0.0140) * 118;
+          fy += Math.cos(t * 0.41 + a.rx * 0.0115 - a.ry * 0.0075) * 104;
+
+          fx += (a.rx - a.x) * K;
+          fy += (a.ry - a.y) * K;
+
+          a.vx = (a.vx + fx * dt) * damp;
+          a.vy = (a.vy + fy * dt) * damp;
+          a.x += a.vx * dt;
+          a.y += a.vy * dt;
+        }
+      },
+
+      pulse: function (st, x, y) {
+        st.drops.push({ x: x, y: y, age: 0 });
+        if (st.drops.length > 4) st.drops.shift();
+      },
+
+      draw: function (ctx, st) {
+        var nodes = st.nodes, cols = st.cols, rows = st.rows, sp = st.sp;
+        ctx.lineCap = "round";
+
+        /* Strain per node, reused by both passes: how far it has been pulled
+           off its rest position, normalised against the grid pitch. */
+        for (var i = 0; i < nodes.length; i++) {
+          var a = nodes[i];
+          var ex = a.x - a.rx, ey = a.y - a.ry;
+          a.s = Math.min(1, Math.sqrt(ex * ex + ey * ey) / (sp * 0.85));
+        }
+
+        /* Two passes. Everything slack shares one colour, so it goes into a
+           single path and costs one stroke; only the segments actually under
+           load need their own. At rest that is one stroke call for the whole
+           mesh instead of one per edge. */
+        var hot = [];
+        function seg(p, q) {
+          var st2 = (p.s + q.s) * 0.5;
+          /* The idle swell alone reaches ~0.14 strain, so the cut sits above
+             that: at rest the whole mesh is one path and one stroke. */
+          if (st2 < 0.22) {
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(q.x, q.y);
+          } else {
+            hot.push(p, q, st2);
+          }
+        }
+
+        ctx.beginPath();
+        ctx.strokeStyle = "rgba(" + BLUE + ",0.12)";
+        ctx.lineWidth = 0.7;
+
+        var r, c;
+        for (r = 0; r < rows; r++) {
+          for (c = 0; c < cols - 1; c++) seg(nodes[r * cols + c], nodes[r * cols + c + 1]);
+        }
+        for (c = 0; c < cols; c++) {
+          for (r = 0; r < rows - 1; r++) seg(nodes[r * cols + c], nodes[(r + 1) * cols + c]);
+        }
+        ctx.stroke();
+
+        for (i = 0; i < hot.length; i += 3) {
+          var p = hot[i], q = hot[i + 1];
+          var mix = Math.min(1, hot[i + 2] * 1.35);
+          ctx.strokeStyle = mix > 0.55
+            ? "rgba(" + ACCENT + "," + (0.20 + mix * 0.5).toFixed(3) + ")"
+            : "rgba(" + BLUE + "," + (0.12 + mix * 0.55).toFixed(3) + ")";
+          ctx.lineWidth = 0.7 + mix * 1.6;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(q.x, q.y);
+          ctx.stroke();
+        }
+
+        /* only the nodes actually under load get a marker */
+        for (i = 0; i < nodes.length; i++) {
+          var b = nodes[i];
+          if (b.s < 0.24) continue;
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, 1 + b.s * 2.1, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(" + ACCENT + "," + (b.s * 0.75).toFixed(3) + ")";
+          ctx.fill();
+        }
+      }
+    },
+
     trace: {
       settle: 900,
       seed: function (W, H) {

@@ -1,10 +1,16 @@
 {% include base_path %}
 
+{%- comment -%}
+  Detail pages share one signature of their own — `lattice` — rather than
+  repeating whichever field their index already runs. The indexes stay on
+  flow / waves / orbits, so arriving here reads as a change of place.
+{%- endcomment -%}
+{% assign field = 'lattice' %}
 {% case page.collection %}
-  {% when 'publications' %}{% assign field = 'flow' %}{% assign back = '/publications/' %}{% assign back_label = 'Publications' %}
-  {% when 'projects' %}{% assign field = 'waves' %}{% assign back = '/projects/' %}{% assign back_label = 'Projects' %}
-  {% when 'teaching' %}{% assign field = 'orbits' %}{% assign back = '/teaching/' %}{% assign back_label = 'Teaching' %}
-  {% else %}{% assign field = 'contract' %}{% assign back = '/' %}{% assign back_label = 'Home' %}
+  {% when 'publications' %}{% assign back = '/publications/' %}{% assign back_label = 'Publications' %}
+  {% when 'projects' %}{% assign back = '/projects/' %}{% assign back_label = 'Projects' %}
+  {% when 'teaching' %}{% assign back = '/teaching/' %}{% assign back_label = 'Teaching' %}
+  {% else %}{% assign back = '/' %}{% assign back_label = 'Home' %}
 {% endcase %}
 
 {% case page.category %}
