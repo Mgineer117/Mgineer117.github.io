@@ -1138,19 +1138,23 @@ html.reveal-on .reveal.is-in {
   box-shadow: 0 0 0 3px rgba(19,41,75,.10);
 }
 
-.cbox__hint { margin: 13px 0 0; font-size: 13px; line-height: 1.65; color: var(--steel-2); max-width: 62ch; }
+.cbox__hint { margin: 13px 0 0; font-size: 13px; line-height: 1.65; color: var(--steel-2); }
+/* One line across the whole column rather than a narrow slab beside it: the
+   text is short enough that the full measure costs nothing to read. */
 .cbox__notice {
-  margin: 12px 0 0;
-  padding: 11px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin: 14px 0 0;
+  padding: 12px 15px;
   border: 1px solid var(--line);
-  border-left: 3px solid var(--steel-2);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border-radius: var(--radius-sm);
   background: var(--paper-2);
   font-size: 13px;
-  line-height: 1.65;
+  line-height: 1.6;
   color: var(--steel);
-  max-width: 66ch;
 }
+.cbox__notice svg { flex: none; margin-top: 1px; color: var(--steel-2); }
 .cbox__notice b { color: var(--navy); }
 .cbox__tag {
   font-family: var(--mono);
@@ -1215,51 +1219,109 @@ html.reveal-on .reveal.is-in {
 
 .cbox__empty { margin: 26px 0 0; font-size: 15px; color: var(--steel-2); }
 
-/* The ⋯ menu. Every comment carries one; the password behind Edit and Delete
-   is the gate, not the presence of the button, so it is shown to everybody. */
+/* The actions menu. Every comment carries one; the password behind Edit and
+   Delete is the gate, not the presence of the button, so everybody sees it. */
 .cbox__more { position: relative; margin-left: auto; align-self: center; }
+.cbox__ico { display: inline-flex; flex: none; }
+.cbox__ico svg { display: block; }
+
 .cbox__dots {
-  background: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
   border: 0;
-  padding: 0 4px;
-  line-height: 1;
-  font-size: 20px;
-  letter-spacing: .02em;
+  border-radius: 50%;
+  background: transparent;
   color: var(--steel-2);
   cursor: pointer;
-  border-radius: 5px;
+  transition: background .16s ease, color .16s ease, opacity .16s ease, transform .12s ease;
 }
-.cbox__dots:hover { color: var(--navy); background: var(--paper-2); }
+.cbox__dots:hover { background: var(--paper-2); color: var(--navy); }
+.cbox__dots:active { transform: scale(.9); }
+.cbox__dots:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cbox__more--open .cbox__dots { background: var(--navy); color: #fff; }
+
+/* Held back until the comment is under the cursor, where a pointer exists to
+   do the holding back. Touch and keyboard always get it. */
+@media (hover: hover) and (min-width: 640px) {
+  .cbox__dots { opacity: 0; }
+  .cbox__item:hover > .cbox__item-head .cbox__dots,
+  .cbox__item:focus-within > .cbox__item-head .cbox__dots,
+  .cbox__more--open .cbox__dots { opacity: 1; }
+}
+
 .cbox__menu {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 8px);
   right: 0;
-  z-index: 5;
-  min-width: 160px;
-  padding: 5px;
+  z-index: 20;
+  min-width: 190px;
+  padding: 6px;
   display: flex;
   flex-direction: column;
+  gap: 2px;
   background: var(--paper);
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  box-shadow: 0 12px 30px rgba(19, 41, 75, .13);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(19, 41, 75, .05), 0 20px 44px -14px rgba(19, 41, 75, .3);
+  transform-origin: top right;
+  animation: cbox-pop .16s cubic-bezier(.2, .9, .3, 1.15);
 }
+@keyframes cbox-pop {
+  from { opacity: 0; transform: scale(.94) translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+
 .cbox__menuitem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 11px;
   background: none;
   border: 0;
-  padding: 8px 11px;
-  text-align: left;
+  border-radius: 8px;
   font-family: inherit;
   font-size: 13.5px;
+  line-height: 1;
   color: var(--navy);
+  text-align: left;
   cursor: pointer;
-  border-radius: 5px;
+  transition: background .13s ease, color .13s ease;
 }
+.cbox__menuitem .cbox__ico { color: var(--steel-2); transition: color .13s ease; }
 .cbox__menuitem:hover { background: var(--paper-2); }
-.cbox__menuitem--danger { color: #9a3412; }
+.cbox__menuitem:hover .cbox__ico { color: var(--navy); }
+.cbox__menuitem:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.cbox__menuitem--danger, .cbox__menuitem--danger .cbox__ico { color: #9a3412; }
+.cbox__menuitem--danger:hover { background: var(--accent-2); }
+.cbox__menuitem--danger:hover .cbox__ico { color: #9a3412; }
 
-.cbox__panel { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); }
+.cbox__panel {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--paper-2);
+  animation: cbox-slide .18s ease;
+}
+@keyframes cbox-slide {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: none; }
+}
+.cbox__panel--delete { background: var(--accent-2); border-color: #f6d8cc; }
 .cbox__panel-ask { margin: 0 0 12px; font-size: 14px; line-height: 1.6; color: var(--steel); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cbox__menu, .cbox__panel { animation: none; }
+  .cbox__dots { transition: none; }
+}
 .cbox__panel-pass {
   width: 100%;
   max-width: 320px;
@@ -1277,6 +1339,7 @@ html.reveal-on .reveal.is-in {
   border-color: var(--navy);
   box-shadow: 0 0 0 3px rgba(19, 41, 75, .10);
 }
+.cbox__panel .cbox__edit { background: var(--paper); }
 .cbox__panel .cbox__error { margin-top: 12px; }
 
 /* One level of replies, and only the author writes them. */
@@ -2088,4 +2151,299 @@ html.reveal-on .reveal.is-in {
   .paper-sheet { border-radius: 14px; }
   .paper-flowline { padding-inline: 12px; }
   .paper-end .paper-nav { grid-template-columns: 1fr; }
+}
+
+
+/* ==========================================================================
+   A blog post
+
+   Neither a paper nor an archive row. The opening is a dark band with the
+   field running through it, but its text sits on the same left edge and the
+   same measure as the prose below, so the page reads as one column from the
+   title to the last line. Everything after it is white and typographic: the
+   section index in the margin, numbered headings, a drop cap, and quotes
+   heavy enough to carry an argument, which in an essay they usually do.
+   ========================================================================== */
+
+.post-page { --post-measure: 720px; }
+
+.post-open {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(160deg, #08131f 0%, var(--ink) 38%, var(--navy) 100%);
+  color: #fff;
+  padding: clamp(72px, 12vh, 132px) 0 clamp(78px, 13vh, 140px);
+}
+.post-field {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: .95;
+}
+/* the band lets go of the reader rather than stopping at a line */
+.post-open__fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 190px;
+  z-index: 2;
+  background: linear-gradient(to bottom, rgba(19, 41, 75, 0) 0%, rgba(10, 23, 41, .55) 62%, var(--paper) 100%);
+}
+.post-open__inner {
+  position: relative;
+  z-index: 3;
+  max-width: var(--post-measure);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+.post-open .eyebrow { color: rgba(255, 255, 255, .72); }
+.post-open .eyebrow::before { background: var(--accent); }
+
+.post-title {
+  margin: 18px 0 0;
+  font-size: clamp(33px, 5.4vw, 54px);
+  line-height: 1.08;
+  letter-spacing: -.03em;
+  font-weight: 650;
+  color: #fff;
+  text-wrap: balance;
+}
+.post-lede {
+  margin: 22px 0 0;
+  max-width: 40ch;
+  font-size: clamp(16.5px, 1.9vw, 19px);
+  line-height: 1.62;
+  color: rgba(255, 255, 255, .78);
+}
+.post-lede em { font-style: italic; color: #fff; }
+
+.post-by {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 34px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, .14);
+  font-size: 14px;
+  color: rgba(255, 255, 255, .8);
+}
+.post-by__face {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, .25);
+}
+.post-by__name { font-weight: 600; color: #fff; }
+.post-by__tags { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.post-by__tags a {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .72);
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 999px;
+  padding: 4px 11px;
+  text-decoration: none;
+  transition: border-color .18s ease, color .18s ease;
+}
+.post-by__tags a:hover { color: #fff; border-color: var(--accent); }
+
+/* ------------------------------------------------------------- the prose -- */
+
+.post-main {
+  position: relative;
+  max-width: var(--post-measure);
+  margin: 0 auto;
+  padding: clamp(46px, 7vh, 76px) var(--gutter) clamp(60px, 9vh, 100px);
+}
+
+.post-body {
+  counter-reset: sec;
+  font-size: 18px;
+  line-height: 1.78;
+  color: #2f3e57;
+}
+.post-body > p { margin: 0 0 1.35em; }
+.post-body > p:first-of-type::first-letter {
+  float: left;
+  margin: .04em .1em 0 0;
+  font-size: 3.5em;
+  line-height: .82;
+  font-weight: 650;
+  color: var(--navy);
+}
+.post-body strong { font-weight: 650; color: var(--navy); }
+.post-body a {
+  color: var(--navy);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+.post-body a:hover { color: var(--accent); }
+
+.post-body h2 {
+  counter-increment: sec;
+  margin: 2.6em 0 .65em;
+  font-size: clamp(21px, 2.6vw, 27px);
+  line-height: 1.25;
+  letter-spacing: -.025em;
+  font-weight: 650;
+  color: var(--navy);
+  scroll-margin-top: 92px;
+}
+.post-body h2::before {
+  content: counter(sec, decimal-leading-zero);
+  display: block;
+  margin-bottom: .75em;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: .18em;
+  color: var(--accent);
+}
+.post-body h3 {
+  margin: 2em 0 .5em;
+  font-size: 18.5px;
+  letter-spacing: -.01em;
+  color: var(--navy);
+}
+
+/* An essay quotes to make a point, so the quote gets to be the loudest thing
+   on the page rather than a smaller, greyer aside. */
+.post-body blockquote {
+  margin: 1.9em 0;
+  padding: 1.05em 1.5em;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--paper-2);
+}
+.post-body blockquote p {
+  margin: 0;
+  font-size: clamp(18px, 2.1vw, 21px);
+  line-height: 1.5;
+  letter-spacing: -.012em;
+  font-weight: 500;
+  color: var(--navy);
+}
+.post-body blockquote p + p { margin-top: .6em; }
+
+.post-body ul, .post-body ol { margin: 0 0 1.35em; padding-left: 1.3em; }
+.post-body li { margin-bottom: .5em; }
+.post-body li::marker { color: var(--steel-2); }
+.post-body hr { margin: 2.6em 0; border: 0; border-top: 1px solid var(--line); }
+.post-body img { max-width: 100%; height: auto; border-radius: var(--radius-sm); }
+.post-body figure { margin: 2em 0; }
+.post-body figcaption { margin-top: 10px; font-size: 13.5px; color: var(--steel-2); }
+.post-body code {
+  font-family: var(--mono);
+  font-size: .88em;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: .1em .38em;
+}
+.post-body pre { overflow-x: auto; border-radius: var(--radius-sm); }
+.post-body pre code { border: 0; background: none; padding: 0; }
+
+/* ------------------------------------------------- the index in the margin -- */
+
+/* Bound to the prose rather than to the viewport: pinned to the window it
+   would ride up over the dark opening, where it is both unreadable and
+   pointing at nothing. Absolute inside .post-main, sticky within that, so it
+   appears with the first paragraph and leaves with the last. */
+.post-index { display: none; }
+@media (min-width: 1240px) {
+  .post-index[hidden] { display: none; }
+  .post-index {
+    display: block;
+    position: absolute;
+    left: -232px;
+    top: clamp(46px, 7vh, 76px);
+    bottom: clamp(60px, 9vh, 100px);
+    width: 196px;
+  }
+  .post-index__stick { position: sticky; top: 42vh; }
+  .post-index__head {
+    margin: 0 0 12px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--steel-2);
+  }
+  .post-index ol { list-style: none; margin: 0; padding: 0; counter-reset: toc; }
+  .post-index li { counter-increment: toc; margin-bottom: 10px; }
+  .post-index a {
+    display: block;
+    padding-left: 13px;
+    border-left: 2px solid var(--line);
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--steel-2);
+    text-decoration: none;
+    transition: color .18s ease, border-color .18s ease;
+  }
+  .post-index a:hover { color: var(--navy); }
+  .post-index a.is-here { color: var(--navy); border-left-color: var(--accent); }
+}
+
+/* -------------------------------------------------------------- the end --- */
+
+.post-foot { margin-top: clamp(48px, 7vh, 78px); }
+
+.post-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
+}
+.post-nav__item {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+.post-nav__item:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+}
+.post-nav__item--next { text-align: right; }
+.post-nav__dir {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--steel-2);
+}
+.post-nav__title { font-size: 15px; line-height: 1.4; color: var(--navy); }
+
+.post-back {
+  display: inline-block;
+  margin-top: 28px;
+  font-size: 14px;
+  color: var(--steel);
+  text-decoration: none;
+}
+.post-back:hover { color: var(--accent); }
+
+@media (max-width: 560px) {
+  .post-nav { grid-template-columns: 1fr; }
+  .post-nav__item--next { text-align: left; }
+  .post-body { font-size: 17px; }
+  .post-by__tags { margin-left: 0; }
 }

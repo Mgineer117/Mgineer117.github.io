@@ -186,18 +186,38 @@ async function boot() {
   const ms = (ts) =>
     (ts && typeof ts.toMillis === "function" ? ts.toMillis() : Number.MAX_SAFE_INTEGER);
 
+  /* Minutes and hours while it is fresh, then the calendar. A comment posted
+     an hour ago reads better as "1h ago" than as today's date and a clock. */
   function when(ts) {
-    if (!ts || typeof ts.toDate !== "function") return "just now";
-    return ts.toDate().toLocaleDateString(undefined,
-      { year: "numeric", month: "short", day: "numeric" });
+    if (!ts || typeof ts.toDate !== "function") return { text: "just now" };
+    const d = ts.toDate();
+    const mins = Math.round((Date.now() - d.getTime()) / 60000);
+    const text =
+      mins < 1    ? "just now" :
+      mins < 60   ? mins + "m ago" :
+      mins < 1440 ? Math.round(mins / 60) + "h ago" :
+      d.toLocaleString(undefined, { month: "short", day: "numeric",
+        year: d.getFullYear() === new Date().getFullYear() ? undefined : "numeric",
+        hour: "numeric", minute: "2-digit" });
+    return { text, iso: d.toISOString(), full: d.toLocaleString() };
   }
 
-  /* An open ⋯ menu closes on the next click anywhere else. */
+  function stamp(row) {
+    const w = when(row.createdAt);
+    const t = el("time", "cbox__item-when", w.text + (row.updatedAt ? " · edited" : ""));
+    if (w.iso) { t.dateTime = w.iso; t.title = w.full; }
+    return t;
+  }
+
+  /* An open menu closes on the next click anywhere else, or on Escape. */
   document.addEventListener("click", (e) => {
     if (open && open.mode === "menu" && !e.target.closest(".cbox__more")) {
       open = null;
       paintList();
     }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && open) { open = null; paintList(); }
   });
 
   /* Redraws that come from outside — a new comment arriving, or the sign-out
@@ -259,6 +279,33 @@ async function boot() {
     return b;
   }
 
+  /* Drawn rather than typed: the ⋯ character sits differently in every font
+     and never lines up with the text beside it. These are static strings, so
+     innerHTML carries nothing a commenter wrote. */
+  const ICONS = {
+    more:  '<circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/>',
+    edit:  '<path d="M4 20.5h4L19 9.5a2.83 2.83 0 0 0-4-4L4 16.5v4z"/><path d="M14.5 6.5l3 3"/>',
+    trash: '<path d="M4 7h16"/><path d="M10 7V4.8h4V7"/><path d="M6.5 7l.9 12.2h9.2L17.5 7"/>',
+    reply: '<path d="M9.5 14.5 5 10l4.5-4.5"/><path d="M5 10h8.5a5.5 5.5 0 0 1 5.5 5.5V19"/>'
+  };
+
+  function icon(name, solid) {
+    const span = el("span", "cbox__ico");
+    span.innerHTML =
+      '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false" ' +
+      (solid ? 'fill="currentColor" stroke="none"'
+             : 'fill="none" stroke="currentColor" stroke-width="1.6" ' +
+               'stroke-linecap="round" stroke-linejoin="round"') +
+      '>' + ICONS[name] + '</svg>';
+    return span;
+  }
+
+  function menuItem(name, label, danger, onClick) {
+    const b = button("cbox__menuitem" + (danger ? " cbox__menuitem--danger" : ""), null, onClick);
+    b.append(icon(name), el("span", null, label));
+    return b;
+  }
+
   function itemFor(row) {
     const li = el("li", "cbox__item");
     const byOwner = adminUids.has(row.uid);
@@ -271,31 +318,30 @@ async function boot() {
       tag.title = "Written by the site owner";
       head.appendChild(tag);
     }
-    head.append(el("span", "cbox__item-when",
-      when(row.createdAt) + (row.updatedAt ? " · edited" : "")));
+    head.append(stamp(row));
 
-    const more = el("div", "cbox__more");
-    const dots = button("cbox__dots", "⋯", (e) => {
+    const showing = !!open && open.id === row.id && open.mode === "menu";
+    const more = el("div", "cbox__more" + (showing ? " cbox__more--open" : ""));
+    const dots = button("cbox__dots", null, (e) => {
       e.stopPropagation();
-      open = (open && open.id === row.id && open.mode === "menu")
-        ? null : { id: row.id, mode: "menu" };
+      open = showing ? null : { id: row.id, mode: "menu" };
       paintList();
     });
+    dots.appendChild(icon("more", true));
     dots.setAttribute("aria-label", "Actions for this comment");
-    dots.setAttribute("aria-expanded",
-      String(!!open && open.id === row.id && open.mode === "menu"));
+    dots.setAttribute("aria-haspopup", "menu");
+    dots.setAttribute("aria-expanded", String(showing));
     more.appendChild(dots);
 
-    if (open && open.id === row.id && open.mode === "menu") {
+    if (showing) {
       const menu = el("div", "cbox__menu");
       menu.setAttribute("role", "menu");
       menu.append(
-        button("cbox__menuitem", "Edit", () => { open = { id: row.id, mode: "edit" }; paintList(); }),
-        button("cbox__menuitem cbox__menuitem--danger", "Delete",
-               () => { open = { id: row.id, mode: "delete" }; paintList(); })
+        menuItem("edit", "Edit", false, () => { open = { id: row.id, mode: "edit" }; paintList(); }),
+        menuItem("trash", "Delete", true, () => { open = { id: row.id, mode: "delete" }; paintList(); })
       );
       if (isAdmin && !row.replyTo) {
-        menu.appendChild(button("cbox__menuitem", "Reply as author",
+        menu.appendChild(menuItem("reply", "Reply as author", false,
           () => { open = { id: row.id, mode: "reply" }; paintList(); }));
       }
       more.appendChild(menu);

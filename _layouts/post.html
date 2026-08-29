@@ -1,0 +1,97 @@
+---
+layout: default
+---
+
+{% include base_path %}
+
+{%- comment -%}
+  An essay, not a paper and not an archive row. One centred column of prose on
+  the paper background, opened by a quiet field that fades out before the text
+  starts, with the section index set in the left margin on wide screens. The
+  ids are the paper layout's on purpose: site.js already builds a contents list
+  and drives a progress bar from them, so this composition needs no new script.
+{%- endcomment -%}
+
+<div class="post-page">
+  <div class="paper-progress" id="paper-progress" aria-hidden="true"><i></i></div>
+
+  <header class="post-open">
+    <canvas id="hero-field" class="post-field" data-field="{{ page.field | default: 'trace' }}"
+            data-host=".post-open" aria-hidden="true"></canvas>
+    <div class="hero__grid" aria-hidden="true"></div>
+    <div class="post-open__fade" aria-hidden="true"></div>
+
+    <div class="post-open__inner">
+      <p class="eyebrow">
+        {{ page.date | date: "%d %B %Y" }}
+        {%- if page.read_time %} &middot; {% include read-time.html %}{% endif -%}
+      </p>
+
+      <h1 class="post-title">{{ page.title | markdownify | remove: "<p>" | remove: "</p>" }}</h1>
+
+      {% if page.excerpt %}
+        <div class="post-lede">{{ page.excerpt | markdownify | remove: "<p>" | remove: "</p>" }}</div>
+      {% endif %}
+
+      <div class="post-by">
+        <img class="post-by__face"
+             src="{{ site.author.avatar | prepend: '/images/' | prepend: base_path }}"
+             alt="" width="34" height="34" loading="lazy">
+        <span class="post-by__name">{{ site.author.name }}</span>
+        {% if page.tags and page.tags.size > 0 %}
+          <span class="post-by__tags">
+            {% for t in page.tags %}<a href="{{ base_path }}/tags/#{{ t | slugify }}">{{ t }}</a>{% endfor %}
+          </span>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <main class="post-main" role="main">
+    <nav class="post-index" id="paper-toc" hidden aria-label="Sections">
+      <div class="post-index__stick">
+        <p class="post-index__head">Contents</p>
+        <ol></ol>
+      </div>
+    </nav>
+
+    <article class="post-body" id="paper-prose" itemprop="text">
+      {{ content }}
+    </article>
+
+    <footer class="post-foot">
+      {% assign posts = site.posts %}
+      {% assign idx = -1 %}
+      {% for p in posts %}{% if p.url == page.url %}{% assign idx = forloop.index0 %}{% endif %}{% endfor %}
+      {% assign newer_i = idx | minus: 1 %}
+      {% assign older_i = idx | plus: 1 %}
+
+      {% if posts.size > 1 %}
+        <nav class="post-nav" aria-label="Other posts">
+          {% if idx > 0 %}
+            {% assign newer = posts[newer_i] %}
+            <a class="post-nav__item" href="{{ base_path }}{{ newer.url }}">
+              <span class="post-nav__dir">Newer</span>
+              <span class="post-nav__title">{{ newer.title }}</span>
+            </a>
+          {% else %}<span></span>{% endif %}
+          {% if older_i < posts.size %}
+            {% assign older = posts[older_i] %}
+            <a class="post-nav__item post-nav__item--next" href="{{ base_path }}{{ older.url }}">
+              <span class="post-nav__dir">Older</span>
+              <span class="post-nav__title">{{ older.title }}</span>
+            </a>
+          {% endif %}
+        </nav>
+      {% endif %}
+
+      <a class="post-back" href="{{ base_path }}/year-archive/">&larr; All posts</a>
+
+      {% assign show_comments = false %}
+      {% if site.firebase.apiKey and site.firebase.apiKey != "" and page.comments_box %}
+        {% assign show_comments = true %}
+      {% endif %}
+      {% if show_comments %}{% include comments-box.html %}{% endif %}
+    </footer>
+  </main>
+</div>

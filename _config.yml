@@ -254,10 +254,10 @@ defaults:
       path: ""
       type: posts
     values:
-      layout: single
-      author_profile: true
+      layout: post
+      author_profile: false
       read_time: true
-      comments: true
+      comments_box: true
       related: true
   # _pages
   - scope:
