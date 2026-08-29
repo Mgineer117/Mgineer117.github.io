@@ -151,6 +151,17 @@
        them in hard. */
     flow: {
       settle: 200,
+      /* These covers are wide and shallow, so a radius drawn from the short
+         side barely leaves the cursor. Scale with width instead and let the
+         reach cross most of the cover. */
+      radius: function (W, H) {
+        /* Bounded by the diagonal as well as by width: on a phone a radius
+           taken from width alone can exceed the whole canvas, and the field
+           collapses into a knot around the finger instead of leaning toward
+           it. */
+        var diag = Math.sqrt(W * W + H * H);
+        return Math.min(Math.max(W * 0.58, 260), diag * 0.62, 940);
+      },
       angle: function (x, y, t, W, H) {
         var nx = x / W, ny = y / H;
         return Math.sin(nx * 3.4 + t * 0.13) * 1.35
@@ -186,11 +197,15 @@
             var dx = a.x - ptr.x, dy = a.y - ptr.y;
             var d = Math.sqrt(dx * dx + dy * dy);
             if (d > 0.5 && d < R) {
-              var f = (1 - d / R) * ptr.active;
+              /* A linear falloff over a wide radius leaves everything past
+                 the halfway mark barely moving. The exponent below 1 keeps
+                 the far half of the field genuinely in play: at 0.8R it pulls
+                 about 0.35 rather than 0.2. */
+              var f = Math.pow(1 - d / R, 0.6) * ptr.active;
               /* pull toward the pointer, with enough swirl to spiral rather
                  than fall straight in */
-              a.x += (-dx / d) * f * 72 * dt + (-dy / d) * f * 108 * dt;
-              a.y += (-dy / d) * f * 72 * dt + ( dx / d) * f * 108 * dt;
+              a.x += (-dx / d) * f * 66 * dt + (-dy / d) * f * 104 * dt;
+              a.y += (-dy / d) * f * 66 * dt + ( dx / d) * f * 104 * dt;
             }
           }
 
@@ -203,7 +218,7 @@
         }
       },
       pulse: function (st, x, y, W, H) {            /* a click draws them in */
-        var R = Math.max(360, Math.min(W, H) * 0.95);
+        var R = Math.max(520, Math.min(W * 0.78, 1180));
         for (var i = 0; i < st.agents.length; i++) {
           var a = st.agents[i];
           var dx = x - a.x, dy = y - a.y;
@@ -642,7 +657,9 @@
       /* The section covers are about half the height of the home cover, so a
          radius taken from min(W, H) collapses and the field stops reacting.
          Floor it, and never let it swallow the whole width. */
-      ptr.r = Math.max(240, Math.min(Math.min(W, H) * 0.6, W * 0.34));
+      ptr.r = field.radius
+        ? field.radius(W, H)
+        : Math.max(240, Math.min(Math.min(W, H) * 0.6, W * 0.34));
       state = field.seed(W, H);
     }
 
