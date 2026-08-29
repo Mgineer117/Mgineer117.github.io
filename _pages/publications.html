@@ -15,36 +15,42 @@ hero:
 {% for post in site.publications %}{% if post.tags %}{% for tag in post.tags %}{% assign all_tags = all_tags | push: tag %}{% endfor %}{% endif %}{% endfor %}
 {% assign unique_tags = all_tags | uniq | sort %}
 {% assign sorted_pubs = site.publications | sort: "date" | reverse %}
-{% assign latest = sorted_pubs | first %}
-{% assign spot_poster = latest.teaser | replace: '.gif', '-poster.jpg' %}
+{% comment %}
+  The spotlight is editorial: it shows whichever publication carries
+  `featured: true` in its front matter. If none does, it falls back to the
+  newest paper so the section is never empty.
+{% endcomment %}
+{% assign picked = site.publications | where: "featured", true | sort: "date" | reverse %}
+{% if picked.size > 0 %}{% assign pick = picked | first %}{% else %}{% assign pick = sorted_pubs | first %}{% endif %}
+{% assign spot_poster = pick.teaser | replace: '.gif', '-poster.jpg' %}
 
 <!-- ------------------------------- spotlight ------------------------------ -->
 <section class="sec sec--tint">
   <div class="wrap">
     <div class="sec-head reveal">
-      <p class="eyebrow">Most recent</p>
-      <h2>{{ latest.venue }}</h2>
+      <p class="eyebrow">Recommended reading</p>
+      <h2>{{ pick.venue }}</h2>
     </div>
 
     <div class="spot reveal">
       <button class="spot__media reel-stage" type="button" aria-pressed="false"
-              aria-label="Play the clip for {{ latest.title | escape }}"
-              data-clip="{{ base_path }}{{ latest.teaser }}">
+              aria-label="Play the clip for {{ pick.title | escape }}"
+              data-clip="{{ base_path }}{{ pick.teaser }}">
         <img src="{{ base_path }}{{ spot_poster }}" alt="" loading="lazy" decoding="async">
         <span class="reel-stage__play"><span>&#9654;</span></span>
       </button>
 
       <div class="spot__body">
         <div class="spot__meta">
-          <span class="chip">{{ latest.date | date: "%B %Y" }}</span>
-          {% for tag in latest.tags %}<span class="chip">{{ tag }}</span>{% endfor %}
+          <span class="chip">{{ pick.date | date: "%B %Y" }}</span>
+          {% for tag in pick.tags %}<span class="chip">{{ tag }}</span>{% endfor %}
         </div>
-        <h3 class="spot__title"><a href="{{ base_path }}{{ latest.url }}">{{ latest.title }}</a></h3>
-        <p class="spot__excerpt">{{ latest.excerpt | strip_html }}</p>
+        <h3 class="spot__title"><a href="{{ base_path }}{{ pick.url }}">{{ pick.title }}</a></h3>
+        <p class="spot__excerpt">{{ pick.excerpt | strip_html }}</p>
         <div class="spot__actions">
-          <a class="btn-x btn-x--sm" href="{{ base_path }}{{ latest.url }}">Read the write-up &rarr;</a>
-          {% if latest.paperurl %}<a class="btn-x btn-x--sm btn-x--ghost" href="{{ latest.paperurl | escape }}" target="_blank" rel="noopener">Paper</a>{% endif %}
-          {% if latest.codeurl %}<a class="btn-x btn-x--sm btn-x--code" href="{{ latest.codeurl | escape }}" target="_blank" rel="noopener">Code</a>{% endif %}
+          <a class="btn-x btn-x--sm" href="{{ base_path }}{{ pick.url }}">Read the write-up &rarr;</a>
+          {% if pick.paperurl %}<a class="btn-x btn-x--sm btn-x--ghost" href="{{ pick.paperurl | escape }}" target="_blank" rel="noopener">Paper</a>{% endif %}
+          {% if pick.codeurl %}<a class="btn-x btn-x--sm btn-x--code" href="{{ pick.codeurl | escape }}" target="_blank" rel="noopener">Code</a>{% endif %}
         </div>
       </div>
     </div>
