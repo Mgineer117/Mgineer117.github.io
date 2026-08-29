@@ -23,6 +23,9 @@
   /* ------------------------------------------------------------------ */
 
   var BLUE = "138,183,255";
+  /* Reassigned once per page from the cover's data-accent, so a publication
+     can carry its own highlight. One cover per page, so a module-level value
+     is the whole of the state this needs. */
   var ACCENT = "232,74,39";
 
   var FIELDS = {
@@ -569,6 +572,540 @@
       }
     },
 
+    /* Meta-CPO — a safety boundary that holds. Agents drift across the cover
+       and are turned back at the constraint; the pointer presses on it like a
+       hand on a rope, and a click sends a wave running along it. */
+    barrier: {
+      settle: 140,
+      radius: function (W, H) {
+        var d = Math.sqrt(W * W + H * H);
+        return Math.min(Math.max(W * 0.55, 260), d * 0.62, 900);
+      },
+      shape: function (st, x, t, W, ptr) {
+        var y = st.y0 + Math.sin(x * st.k + t * 0.42) * st.amp
+                      + Math.sin(x * st.k * 2.3 - t * 0.31) * st.amp * 0.28;
+        if (ptr && ptr.active > 0.01) {
+          var u = (x - ptr.x) / (W * 0.14);
+          y += (ptr.y - y) * Math.exp(-u * u) * 0.92 * ptr.active;
+        }
+        for (var i = 0; i < st.waves.length; i++) {
+          var w = st.waves[i];
+          var d = Math.abs(x - w.x) - w.age * 520;
+          var v = d / (W * 0.05);
+          y += w.amp * Math.exp(-v * v) * Math.exp(-w.age * 1.3);
+        }
+        return y;
+      },
+      seed: function (W, H) {
+        var n = W < 620 ? 16 : W < 1000 ? 26 : 38;
+        var ag = [];
+        for (var i = 0; i < n; i++) {
+          ag.push({ x: Math.random() * W, y: Math.random() * H * 0.5,
+                    vx: 18 + Math.random() * 34, vy: 10 + Math.random() * 26, hot: 0 });
+        }
+        return { agents: ag, y0: H * 0.60, amp: H * 0.13, k: 4.2 / W, waves: [] };
+      },
+      step: function (st, dt, t, W, H, ptr) {
+        for (var w = st.waves.length - 1; w >= 0; w--) {
+          st.waves[w].age += dt;
+          if (st.waves[w].age > 2.2) st.waves.splice(w, 1);
+        }
+        for (var i = 0; i < st.agents.length; i++) {
+          var a = st.agents[i];
+          a.x += a.vx * dt;
+          a.y += a.vy * dt;
+          var lim = this.shape(st, a.x, t, W, ptr);
+          if (a.y > lim - 6) {                 /* turned back at the constraint */
+            a.y = lim - 6;
+            a.vy = -Math.abs(a.vy) * 0.72 - 12;
+            a.hot = 1;
+          }
+          a.vy += 26 * dt;                     /* a steady pull toward the edge */
+          a.hot = Math.max(0, a.hot - dt * 1.8);
+          if (a.x > W + 20) { a.x = -20; a.y = Math.random() * H * 0.45; a.vy = 10 + Math.random() * 26; }
+          if (a.y < -20) { a.y = -18; a.vy = Math.abs(a.vy) * 0.4; }
+        }
+      },
+      pulse: function (st, x, y, W, H) {
+        st.waves.push({ x: x, amp: (y - st.y0) * 0.6 || H * 0.12, age: 0 });
+        if (st.waves.length > 3) st.waves.shift();
+      },
+      draw: function (ctx, st, t, W, H, ptr) {
+        var step = Math.max(6, W / 160), x, y;
+
+        /* the side the agents may not enter */
+        ctx.beginPath();
+        ctx.moveTo(0, H);
+        for (x = 0; x <= W; x += step) ctx.lineTo(x, this.shape(st, x, t, W, ptr));
+        ctx.lineTo(W, H);
+        ctx.closePath();
+        ctx.fillStyle = "rgba(" + ACCENT + ",0.055)";
+        ctx.fill();
+
+        ctx.beginPath();
+        for (x = 0; x <= W; x += step) {
+          y = this.shape(st, x, t, W, ptr);
+          if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = "rgba(" + ACCENT + ",0.62)";
+        ctx.lineWidth = 1.6;
+        ctx.stroke();
+
+        for (var i = 0; i < st.agents.length; i++) {
+          var a = st.agents[i];
+          ctx.beginPath();
+          ctx.arc(a.x, a.y, a.hot > 0.05 ? 2.9 : 1.8, 0, Math.PI * 2);
+          ctx.fillStyle = a.hot > 0.05
+            ? "rgba(" + ACCENT + "," + (0.35 + a.hot * 0.6).toFixed(3) + ")"
+            : "rgba(" + BLUE + ",0.5)";
+          ctx.fill();
+        }
+      }
+    },
+
+    /* HiMeta — macro-actions discovered, reused, discarded. A tree grows from
+       the floor, leans toward the pointer, and is replaced once it tops out. */
+    branch: {
+      settle: 90,
+      seed: function (W, H) {
+        return { segs: [], tips: [], age: 0, W: W, H: H, cap: W < 620 ? 130 : 260 };
+      },
+      root: function (st, W, H) {
+        st.segs.length = 0;
+        st.tips.length = 0;
+        st.age = 0;
+        var n = W < 620 ? 1 : 2;
+        for (var i = 0; i < n; i++) {
+          st.tips.push({
+            x: W * (n === 1 ? 0.5 : 0.3 + i * 0.4), y: H + 8,
+            a: -Math.PI / 2 + (Math.random() - 0.5) * 0.3,
+            len: 0, depth: 0, span: H * (0.16 + Math.random() * 0.07)
+          });
+        }
+      },
+      step: function (st, dt, t, W, H, ptr) {
+        if (!st.tips.length && !st.segs.length) this.root(st, W, H);
+        st.age += dt;
+
+        var sp = H * 0.34;
+        for (var i = st.tips.length - 1; i >= 0; i--) {
+          var tp = st.tips[i];
+          var nx = tp.x + Math.cos(tp.a) * sp * dt;
+          var ny = tp.y + Math.sin(tp.a) * sp * dt;
+
+          /* One segment per frame would put the record count in the hundreds
+             at 60fps for a line that looks identical; emit per ~5px instead. */
+          if (tp.lx === undefined) { tp.lx = tp.x; tp.ly = tp.y; }
+          var mx = nx - tp.lx, my = ny - tp.ly;
+          if (mx * mx + my * my >= 25) {
+            st.segs.push({ x1: tp.lx, y1: tp.ly, x2: nx, y2: ny, d: tp.depth, age: 0 });
+            tp.lx = nx; tp.ly = ny;
+          }
+          tp.x = nx; tp.y = ny; tp.len += sp * dt;
+
+          /* lean toward the pointer rather than snap to it */
+          if (ptr && ptr.active > 0.01) {
+            var want = Math.atan2(ptr.y - tp.y, ptr.x - tp.x);
+            var diff = Math.atan2(Math.sin(want - tp.a), Math.cos(want - tp.a));
+            tp.a += diff * 1.1 * dt * ptr.active;
+          }
+          tp.a += (Math.random() - 0.5) * 1.5 * dt;
+
+          if (tp.len > tp.span) {
+            st.tips.splice(i, 1);
+            if (tp.depth < 4 && st.segs.length < st.cap) {
+              for (var k = 0; k < 2; k++) {
+                st.tips.push({
+                  x: tp.x, y: tp.y,
+                  a: tp.a + (k ? 1 : -1) * (0.34 + Math.random() * 0.34),
+                  len: 0, depth: tp.depth + 1,
+                  span: tp.span * (0.62 + Math.random() * 0.22)
+                });
+              }
+            }
+          }
+          if (tp.y < -30 || tp.x < -30 || tp.x > W + 30) st.tips.splice(i, 1);
+        }
+
+        for (var j = st.segs.length - 1; j >= 0; j--) {
+          st.segs[j].age += dt;
+          if (st.segs[j].age > 7.5) st.segs.splice(j, 1);
+        }
+        if (!st.tips.length && st.age > 3.4) this.root(st, W, H);
+      },
+      pulse: function (st, x, y, W, H) {
+        st.tips.push({ x: x, y: y, a: -Math.PI / 2 + (Math.random() - 0.5) * 1.6,
+                       len: 0, depth: 1, span: H * 0.13 });
+      },
+      draw: function (ctx, st) {
+        ctx.lineCap = "round";
+        for (var i = 0; i < st.segs.length; i++) {
+          var s = st.segs[i];
+          var fade = Math.min(1, s.age * 3) * Math.min(1, (7.5 - s.age) * 0.5);
+          ctx.beginPath();
+          ctx.moveTo(s.x1, s.y1);
+          ctx.lineTo(s.x2, s.y2);
+          ctx.strokeStyle = s.d === 0
+            ? "rgba(" + ACCENT + "," + (0.42 * fade).toFixed(3) + ")"
+            : "rgba(" + BLUE + "," + ((0.34 - s.d * 0.05) * fade).toFixed(3) + ")";
+          ctx.lineWidth = Math.max(0.6, 2.4 - s.d * 0.45);
+          ctx.stroke();
+        }
+        for (var k = 0; k < st.tips.length; k++) {
+          ctx.beginPath();
+          ctx.arc(st.tips[k].x, st.tips[k].y, 2, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(" + ACCENT + ",0.75)";
+          ctx.fill();
+        }
+      }
+    },
+
+    /* MOOD-CRL — a distribution pulled off its support. Samples ride from the
+       training mode to a second one that follows the pointer; the further they
+       land from where the data was, the hotter they read. */
+    density: {
+      settle: 200,
+      radius: function (W, H) {
+        var d = Math.sqrt(W * W + H * H);
+        return Math.min(Math.max(W * 0.55, 260), d * 0.62, 900);
+      },
+      gauss: function () {
+        var u = 0, v = 0;
+        while (!u) u = Math.random();
+        while (!v) v = Math.random();
+        return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+      },
+      seed: function (W, H) {
+        var n = W < 620 ? 60 : W < 1000 ? 110 : 170;
+        var pts = [];
+        for (var i = 0; i < n; i++) {
+          pts.push({ u: Math.random(), sp: 0.20 + Math.random() * 0.26,
+                     gx: this.gauss(), gy: this.gauss(),
+                     hx: this.gauss(), hy: this.gauss(), x: 0, y: 0, r: 0 });
+        }
+        return { pts: pts, sx: W * 0.32, sy: H * 0.54, tx: W * 0.68, ty: H * 0.46,
+                 sr: Math.min(W, H) * 0.15, tr: Math.min(W, H) * 0.13 };
+      },
+      step: function (st, dt, t, W, H, ptr) {
+        var wantX = W * (0.66 + Math.sin(t * 0.24) * 0.06);
+        var wantY = H * (0.46 + Math.cos(t * 0.19) * 0.10);
+        if (ptr && ptr.active > 0.01) {
+          wantX = wantX + (ptr.x - wantX) * ptr.active;
+          wantY = wantY + (ptr.y - wantY) * ptr.active;
+        }
+        st.tx += (wantX - st.tx) * (1 - Math.exp(-3.2 * dt));
+        st.ty += (wantY - st.ty) * (1 - Math.exp(-3.2 * dt));
+
+        var shift = Math.sqrt((st.tx - st.sx) * (st.tx - st.sx) + (st.ty - st.sy) * (st.ty - st.sy));
+        /* Judged against the whole cover. Against the short side, an ordinary
+           resting shift already saturated and every sample read as drifted,
+           which erases the contrast the picture depends on. */
+        var norm = Math.max(1, Math.sqrt(W * W + H * H) * 0.55);
+
+        for (var i = 0; i < st.pts.length; i++) {
+          var p = st.pts[i];
+          p.u += p.sp * dt;
+          if (p.u > 1) {
+            p.u = 0;
+            p.gx = this.gauss(); p.gy = this.gauss();
+            p.hx = this.gauss(); p.hy = this.gauss();
+          }
+          var e = p.u < 0.5 ? 2 * p.u * p.u : 1 - Math.pow(-2 * p.u + 2, 2) / 2;
+          var ax = st.sx + p.gx * st.sr, ay = st.sy + p.gy * st.sr;
+          var bx = st.tx + p.hx * st.tr, by = st.ty + p.hy * st.tr;
+          p.x = ax + (bx - ax) * e;
+          p.y = ay + (by - ay) * e + Math.sin(e * Math.PI) * -18;   /* a slight arc */
+          p.r = Math.min(1, (shift / norm) * e);
+        }
+      },
+      pulse: function (st) {
+        for (var i = 0; i < st.pts.length; i++) st.pts[i].u = Math.random() * 0.25;
+      },
+      draw: function (ctx, st) {
+        function ring(x, y, r, alpha) {
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.strokeStyle = "rgba(" + BLUE + "," + alpha + ")";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+        ring(st.sx, st.sy, st.sr, 0.16);
+        ring(st.sx, st.sy, st.sr * 1.9, 0.08);
+        ring(st.tx, st.ty, st.tr, 0.13);
+
+        /* In-support samples are quantised into a few alpha buckets so each
+           bucket is one path and one fill; only the drifted ones, which are
+           what the cover is about, are drawn individually. */
+        var B = 4, buckets = [], i, p;
+        for (i = 0; i < B; i++) buckets.push([]);
+        for (i = 0; i < st.pts.length; i++) {
+          p = st.pts[i];
+          if (p.r > 0.45) continue;
+          var fade = Math.sin(Math.min(1, p.u) * Math.PI);
+          buckets[Math.min(B - 1, (fade * B) | 0)].push(p);
+        }
+        for (var b = 0; b < B; b++) {
+          if (!buckets[b].length) continue;
+          ctx.beginPath();
+          for (i = 0; i < buckets[b].length; i++) {
+            p = buckets[b][i];
+            ctx.moveTo(p.x + 1.7, p.y);
+            ctx.arc(p.x, p.y, 1.7, 0, Math.PI * 2);
+          }
+          ctx.fillStyle = "rgba(" + BLUE + "," + (((b + 0.5) / B) * 0.5).toFixed(3) + ")";
+          ctx.fill();
+        }
+        for (i = 0; i < st.pts.length; i++) {
+          p = st.pts[i];
+          if (p.r <= 0.45) continue;
+          var fd = Math.sin(Math.min(1, p.u) * Math.PI);
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 1.5 + p.r * 1.4, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(" + ACCENT + "," + (p.r * fd * 0.8).toFixed(3) + ")";
+          ctx.fill();
+        }
+      }
+    },
+
+    /* IRPO — reward is sparse, so the interesting thing is the frontier. A
+       search floods outward across the cover; the pointer keeps seeding fresh
+       fronts, a click drops one. */
+    search: {
+      settle: 40,
+      seed: function (W, H) {
+        var sp = Math.max(13, Math.min(22, W / 70));
+        var cols = Math.ceil(W / sp) + 1, rows = Math.ceil(H / sp) + 1;
+        var cells = new Float32Array(cols * rows);        /* 0 = unvisited, else age */
+        return { cells: cells, cols: cols, rows: rows, sp: sp,
+                 front: [], next: [], acc: 0, tick: 0.045, sow: 0 };
+      },
+      sowAt: function (st, x, y) {
+        var c = Math.round(x / st.sp), r = Math.round(y / st.sp);
+        if (c < 0 || r < 0 || c >= st.cols || r >= st.rows) return;
+        var i = r * st.cols + c;
+        if (st.cells[i] > 0) return;
+        st.cells[i] = 0.0001;
+        st.front.push(i);
+      },
+      step: function (st, dt, t, W, H, ptr) {
+        var cells = st.cells;
+        for (var i = 0; i < cells.length; i++) if (cells[i] > 0) cells[i] += dt;
+
+        st.sow += dt;
+        if (st.sow > 0.5) {
+          st.sow = 0;
+          if (ptr && ptr.active > 0.4) {
+            this.sowAt(st, ptr.x + (Math.random() - 0.5) * st.sp * 3,
+                           ptr.y + (Math.random() - 0.5) * st.sp * 3);
+          } else if (st.front.length < 3) {
+            this.sowAt(st, Math.random() * W, Math.random() * H);
+          }
+        }
+
+        st.acc += dt;
+        while (st.acc > st.tick) {
+          st.acc -= st.tick;
+          var front = st.front, next = st.next;
+          next.length = 0;
+          for (var f = 0; f < front.length; f++) {
+            var idx = front[f];
+            var c = idx % st.cols, r = (idx - c) / st.cols;
+            for (var k = 0; k < 4; k++) {
+              var nc = c + (k === 0 ? 1 : k === 1 ? -1 : 0);
+              var nr = r + (k === 2 ? 1 : k === 3 ? -1 : 0);
+              if (nc < 0 || nr < 0 || nc >= st.cols || nr >= st.rows) continue;
+              var ni = nr * st.cols + nc;
+              if (cells[ni] > 0) continue;
+              cells[ni] = 0.0001;
+              next.push(ni);
+            }
+          }
+          st.front = next;
+          st.next = front;
+        }
+
+        /* once the sheet is mostly explored, start again */
+        var seen = 0;
+        for (i = 0; i < cells.length; i += 7) if (cells[i] > 0) seen++;
+        if (seen > (cells.length / 7) * 0.9) {
+          for (i = 0; i < cells.length; i++) cells[i] = 0;
+          st.front.length = 0;
+        }
+      },
+      pulse: function (st, x, y) { this.sowAt(st, x, y); },
+      draw: function (ctx, st) {
+        var sp = st.sp, cells = st.cells, half = sp * 0.34, side = half * 2;
+
+        /* A visited sheet is ~1800 cells. One fillRect each is far too many
+           calls a frame, so alpha is quantised into a few buckets and each
+           bucket is a single path and a single fill. */
+        var B = 5, bucket = [], i;
+        for (i = 0; i < B; i++) bucket.push([]);
+        for (i = 0; i < cells.length; i++) {
+          var a = cells[i];
+          if (!a) continue;
+          var fade = 1 - a * 0.30;
+          if (fade < 0.05) continue;
+          var b = Math.min(B - 1, (fade * B) | 0);
+          bucket[b].push(i);
+        }
+        for (b = 0; b < B; b++) {
+          var list = bucket[b];
+          if (!list.length) continue;
+          ctx.beginPath();
+          for (var k = 0; k < list.length; k++) {
+            var idx = list[k], c = idx % st.cols, r = (idx - c) / st.cols;
+            ctx.rect(c * sp - half, r * sp - half, side, side);
+          }
+          ctx.fillStyle = "rgba(" + BLUE + "," + (((b + 0.5) / B) * 0.30).toFixed(3) + ")";
+          ctx.fill();
+        }
+        ctx.beginPath();
+        for (var f = 0; f < st.front.length; f++) {
+          var fi = st.front[f], fc = fi % st.cols, fr = (fi - fc) / st.cols;
+          ctx.rect(fc * sp - half, fr * sp - half, side, side);
+        }
+        ctx.fillStyle = "rgba(" + ACCENT + ",0.85)";
+        ctx.fill();
+      }
+    },
+
+    /* Sparsity — coverage, not position, is the risk. Points bind to the
+       nearest centroid; the ones stranded far from any of them light up, which
+       is the whole argument of the paper. The pointer is an extra centroid. */
+    clusters: {
+      settle: 120,
+      radius: function (W, H) {
+        var d = Math.sqrt(W * W + H * H);
+        return Math.min(Math.max(W * 0.5, 240), d * 0.55, 820);
+      },
+      seed: function (W, H) {
+        var n = W < 620 ? 55 : W < 1000 ? 90 : 140;
+        var k = W < 620 ? 3 : 5;
+        var pts = [], cen = [], i;
+        for (i = 0; i < k; i++) {
+          cen.push({ x: W * (0.16 + Math.random() * 0.68), y: H * (0.2 + Math.random() * 0.6),
+                     ax: 0, ay: 0, n: 0 });
+        }
+        for (i = 0; i < n; i++) {
+          /* clumped around the centroids, plus a thin scatter between them */
+          var host = cen[(Math.random() * cen.length) | 0];
+          var loose = Math.random() < 0.22;
+          pts.push({
+            hx: loose ? Math.random() * W : host.x + (Math.random() - 0.5) * Math.min(W, H) * 0.42,
+            hy: loose ? Math.random() * H : host.y + (Math.random() - 0.5) * Math.min(W, H) * 0.38,
+            ph: Math.random() * 6.28, x: 0, y: 0, ci: 0, s: 0
+          });
+        }
+        /* Sparsity is judged against the area a centroid ought to cover, not
+           against the short side: on a wide cover the latter marked almost
+           every point as stranded, which is the opposite of the argument. */
+        return { pts: pts, cen: cen, norm: Math.sqrt((W * H) / k) };
+      },
+      step: function (st, dt, t, W, H, ptr) {
+        var i, j, c;
+        for (j = 0; j < st.cen.length; j++) { st.cen[j].ax = 0; st.cen[j].ay = 0; st.cen[j].n = 0; }
+
+        var live = ptr && ptr.active > 0.25;
+        for (i = 0; i < st.pts.length; i++) {
+          var p = st.pts[i];
+          p.x = p.hx + Math.sin(t * 0.35 + p.ph) * 5;
+          p.y = p.hy + Math.cos(t * 0.29 + p.ph) * 5;
+
+          var best = -1, bd = 1e9;
+          for (j = 0; j < st.cen.length; j++) {
+            c = st.cen[j];
+            var dx = p.x - c.x, dy = p.y - c.y;
+            var d2 = dx * dx + dy * dy;
+            if (d2 < bd) { bd = d2; best = j; }
+          }
+          var dist = Math.sqrt(bd);
+
+          if (live) {
+            var px = p.x - ptr.x, py = p.y - ptr.y;
+            var pd = Math.sqrt(px * px + py * py);
+            if (pd < dist) { best = -1; dist = pd; }   /* the cursor wins the point */
+          }
+          p.ci = best;
+          p.s = Math.min(1, dist / st.norm);
+          if (best >= 0) { c = st.cen[best]; c.ax += p.x; c.ay += p.y; c.n++; }
+        }
+
+        /* Lloyd, damped so the centroids glide instead of snapping */
+        for (j = 0; j < st.cen.length; j++) {
+          c = st.cen[j];
+          if (!c.n) continue;
+          c.x += (c.ax / c.n - c.x) * (1 - Math.exp(-1.6 * dt));
+          c.y += (c.ay / c.n - c.y) * (1 - Math.exp(-1.6 * dt));
+        }
+      },
+      pulse: function (st, x, y, W, H) {
+        for (var j = 0; j < st.cen.length; j++) {
+          st.cen[j].x = W * (0.14 + Math.random() * 0.72);
+          st.cen[j].y = H * (0.18 + Math.random() * 0.64);
+        }
+      },
+      /* 0.40 marks about one point in six as stranded here — enough to read
+         as a signal rather than as noise or as the whole picture. */
+      cut: 0.40,
+      draw: function (ctx, st, t, W, H, ptr) {
+        var i, p, tx, ty;
+        ctx.lineWidth = 0.65;
+
+        /* well-covered points all look the same, so they cost one stroke */
+        ctx.beginPath();
+        for (i = 0; i < st.pts.length; i++) {
+          p = st.pts[i];
+          if (p.s > this.cut) continue;
+          if (p.ci >= 0) { tx = st.cen[p.ci].x; ty = st.cen[p.ci].y; }
+          else if (ptr) { tx = ptr.x; ty = ptr.y; } else continue;
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(tx, ty);
+        }
+        ctx.strokeStyle = "rgba(" + BLUE + ",0.12)";
+        ctx.stroke();
+
+        /* the stranded ones are the point of the picture, so they are drawn
+           individually and warm with how far from cover they sit */
+        for (i = 0; i < st.pts.length; i++) {
+          p = st.pts[i];
+          if (p.s <= this.cut) continue;
+          if (p.ci >= 0) { tx = st.cen[p.ci].x; ty = st.cen[p.ci].y; }
+          else if (ptr) { tx = ptr.x; ty = ptr.y; } else continue;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(tx, ty);
+          ctx.strokeStyle = "rgba(" + ACCENT + "," + ((p.s - 0.4) * 0.42).toFixed(3) + ")";
+          ctx.stroke();
+        }
+        ctx.beginPath();
+        for (i = 0; i < st.pts.length; i++) {
+          var q = st.pts[i];
+          if (q.s > this.cut) continue;
+          ctx.moveTo(q.x + 1.7, q.y);
+          ctx.arc(q.x, q.y, 1.7, 0, Math.PI * 2);
+        }
+        ctx.fillStyle = "rgba(" + BLUE + ",0.5)";
+        ctx.fill();
+
+        for (i = 0; i < st.pts.length; i++) {
+          var h = st.pts[i];
+          if (h.s <= this.cut) continue;
+          ctx.beginPath();
+          ctx.arc(h.x, h.y, 1.4 + h.s * 1.8, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(" + ACCENT + "," + (0.3 + h.s * 0.55).toFixed(3) + ")";
+          ctx.fill();
+        }
+        for (var j = 0; j < st.cen.length; j++) {
+          ctx.beginPath();
+          ctx.arc(st.cen[j].x, st.cen[j].y, 5.5, 0, Math.PI * 2);
+          ctx.strokeStyle = "rgba(255,255,255,0.55)";
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+        }
+      }
+    },
+
     trace: {
       settle: 900,
       seed: function (W, H) {
@@ -639,6 +1176,8 @@
 
     var host = canvas.parentElement;                 /* the cover, not the canvas: */
     var field = FIELDS[canvas.getAttribute("data-field")] || FIELDS.contract;
+    var accent = canvas.getAttribute("data-accent");
+    if (accent && /^\d{1,3},\d{1,3},\d{1,3}$/.test(accent)) ACCENT = accent;
     var ctx = canvas.getContext("2d");               /* the canvas sits behind the */
     var W = 0, H = 0, dpr = 1, t = 0;                /* text and gets no events    */
     var raf = null, visible = true, state = null;

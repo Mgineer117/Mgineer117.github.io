@@ -4,6 +4,22 @@ layout: default
 
 {% include base_path %}
 
+{%- comment -%}
+  A publication carries its own highlight, so the page retints around it:
+  chips, buttons, the contents marker, the progress bar. --accent-2 is derived
+  rather than hand-picked, and where color-mix is unsupported the declaration
+  is simply dropped and the site default stands.
+{%- endcomment -%}
+{% if page.accent %}
+<style>
+  .paper-page {
+    --accent: rgb({{ page.accent }});
+    --accent-2: color-mix(in srgb, rgb({{ page.accent }}) 12%, #fff);
+  }
+</style>
+{% endif %}
+
+<div class="paper-page">
 <div class="paper-progress" id="paper-progress" aria-hidden="true"><i></i></div>
 
 {% include paper-hero.html %}
@@ -147,3 +163,4 @@ layout: default
     {% endif %}
   {% endif %}
 </main>
+</div>

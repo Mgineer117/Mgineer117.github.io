@@ -5,7 +5,7 @@
   repeating whichever field their index already runs. The indexes stay on
   flow / waves / orbits, so arriving here reads as a change of place.
 {%- endcomment -%}
-{% assign field = 'lattice' %}
+{% assign field = page.field | default: 'lattice' %}
 {% case page.collection %}
   {% when 'publications' %}{% assign back = '/publications/' %}{% assign back_label = 'Publications' %}
   {% when 'projects' %}{% assign back = '/projects/' %}{% assign back_label = 'Projects' %}
@@ -21,7 +21,7 @@
 {% endcase %}
 
 <header class="hero hero--paper">
-  <canvas id="hero-field" class="hero__canvas" data-field="{{ field }}" aria-hidden="true"></canvas>
+  <canvas id="hero-field" class="hero__canvas" data-field="{{ field }}"{% if page.accent %} data-accent="{{ page.accent }}"{% endif %} aria-hidden="true"></canvas>
   <div class="hero__grid" aria-hidden="true"></div>
   <div class="hero__vignette" aria-hidden="true"></div>
 
