@@ -1,14 +1,36 @@
 ---
-layout: archive
+layout: section
 title: "Curriculum Vitae"
 permalink: /cv/
-author_profile: true
+hero:
+  field: contract
+  eyebrow: "Full record"
+  lede: "Education, publications, awards, funding, teaching, and service."
 redirect_from:
   - /resume
 ---
 
 {% include base_path %}
 
-<iframe src="/files/CV.pdf" width="100%" height="1300px" style="border: 1px solid #e1e4e8; border-radius: 4px;">
-  <p>Your browser does not support viewing PDFs inline. <a href="/files/CV.pdf">Click here to download the PDF</a>.</p>
-</iframe>
+<section class="sec">
+  <div class="wrap">
+
+    <div class="cv-bar reveal">
+      <p class="cv-bar__note">Last updated from <code>files/CV.pdf</code></p>
+      <div class="cv-bar__links">
+        <a class="btn-x btn-x--sm" href="{{ base_path }}/files/CV.pdf" download>Download PDF</a>
+        <a class="btn-x btn-x--sm btn-x--ghost" href="{{ base_path }}/files/CV.pdf" target="_blank" rel="noopener">Open in a new tab</a>
+      </div>
+    </div>
+
+    <div class="cv-frame reveal">
+      <iframe src="{{ base_path }}/files/CV.pdf" title="Curriculum Vitae of MJ (Minjae) Cho" loading="lazy">
+      </iframe>
+      <p class="cv-frame__fallback">
+        Your browser will not display the PDF inline &mdash;
+        <a href="{{ base_path }}/files/CV.pdf">download it instead</a>.
+      </p>
+    </div>
+
+  </div>
+</section>

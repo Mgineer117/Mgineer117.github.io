@@ -1,8 +1,7 @@
 ---
-layout: archive
+layout: section
 permalink: /year-archive/
 title: "Blog"
-author_profile: true
 hero:
   field: trace
   eyebrow: "Notes & writing"
@@ -13,26 +12,37 @@ redirect_from:
 
 {% include base_path %}
 
-{% if site.posts.size == 0 %}
+<section class="sec">
+  <div class="wrap">
 
-  <div class="empty-state">
-    <p class="empty-state__tag">TBA</p>
-    <p class="empty-state__body">
-      Nothing published here yet. In the meantime, the
-      <a href="{{ base_path }}/publications/">publications</a> carry the technical write-ups.
-    </p>
+  {% if site.posts.size == 0 %}
+
+    <div class="empty-state reveal">
+      <p class="empty-state__tag">TBA</p>
+      <p class="empty-state__body">
+        Nothing posted here yet. The technical write-ups live with the papers in the meantime &mdash;
+        each one covers the idea, the method, and the results.
+      </p>
+      <div class="empty-state__links">
+        <a class="btn-x btn-x--sm" href="{{ base_path }}/publications/">Publications &rarr;</a>
+        <a class="btn-x btn-x--sm btn-x--ghost" href="{{ base_path }}/">Home</a>
+      </div>
+    </div>
+
+  {% else %}
+
+    {% assign by_year = site.posts | group_by_exp: "item", "item.date | date: '%Y'" %}
+    {% for group in by_year %}
+      <h3 class="group-head reveal">
+        <span>{{ group.name }}</span>
+        <em>{{ group.items | size }}</em>
+      </h3>
+      <div class="reveal">
+        {% for post in group.items %}{% include archive-single.html %}{% endfor %}
+      </div>
+    {% endfor %}
+
+  {% endif %}
+
   </div>
-
-{% else %}
-
-  {% capture written_year %}'None'{% endcapture %}
-  {% for post in site.posts %}
-    {% capture year %}{{ post.date | date: '%Y' }}{% endcapture %}
-    {% if year != written_year %}
-      <h2 id="{{ year | slugify }}" class="archive__subtitle">{{ year }}</h2>
-      {% capture written_year %}{{ year }}{% endcapture %}
-    {% endif %}
-    {% include archive-single.html %}
-  {% endfor %}
-
-{% endif %}
+</section>

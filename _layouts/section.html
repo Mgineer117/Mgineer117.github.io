@@ -1,0 +1,11 @@
+---
+layout: default
+---
+
+{% include base_path %}
+
+{% if page.hero %}{% include page-hero.html %}{% endif %}
+
+<main class="home-main" role="main">
+  {{ content }}
+</main>

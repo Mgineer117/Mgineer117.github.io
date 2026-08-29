@@ -1,8 +1,7 @@
 ---
-layout: archive
+layout: section
 title: "Teaching"
 permalink: /teaching/
-author_profile: true
 hero:
   kind: teaching
   field: orbits
@@ -12,9 +11,34 @@ hero:
 
 {% include base_path %}
 
-<div id="teaching-container">
-  {% assign sorted_teaching = site.teaching | sort: "date" | reverse %}
-  {% for post in sorted_teaching %}
-    {% include archive-single-teaching.html %}
-  {% endfor %}
-</div>
+<section class="sec">
+  <div class="wrap">
+    {% assign by_year = site.teaching | group_by_exp: "item", "item.date | date: '%Y'" | sort: "name" | reverse %}
+    {% for group in by_year %}
+      <h3 class="group-head reveal">
+        <span>{{ group.name }}</span>
+        <em>{{ group.items | size }}</em>
+      </h3>
+      <div class="teach-grid reveal">
+        {% assign in_year = group.items | sort: "date" | reverse %}
+        {% for post in in_year %}{% include archive-single-teaching.html %}{% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="sec sec--tint">
+  <div class="wrap">
+    <div class="cta-strip reveal">
+      <div>
+        <p class="eyebrow">Course material</p>
+        <h3>Questions about a course?</h3>
+        <p>Happy to talk through anything from these semesters.</p>
+      </div>
+      <div class="cta-strip__links">
+        <a class="btn-x btn-x--sm" href="mailto:minjae5@illinois.edu">Email</a>
+        <a class="btn-x btn-x--sm btn-x--ghost" href="{{ base_path }}/cv/">CV</a>
+      </div>
+    </div>
+  </div>
+</section>
