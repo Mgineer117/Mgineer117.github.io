@@ -132,7 +132,7 @@ redirect_from:
 
 <h2 style="color: #13294B; border-bottom: 1px solid #e1e4e8; padding-bottom: 10px;">🚀 Research Interests</h2>
 <p style="font-size: 16px; line-height: 1.6;">
-    My research aims at enabling the power of AI in <strong>complex robotic systems</strong> at the intersection of <strong>reinforcement learning (RL)</strong> and <strong>control theory</strong>.
+    My research aims at developing <strong>robust robotic autonomy</strong> at the intersection of <strong>reinforcement learning (RL)</strong> and <strong>control theory</strong>.
 </p>
 
 <style>
@@ -247,7 +247,7 @@ redirect_from:
 
             <a href="{{ site.baseurl }}/publication/2024-12-16-HIMETA" class="project-card" data-topics="All,Hierarchical RL,Meta-RL">
                 <img src="{{ site.baseurl }}/files/HIMETA/himeta.gif" alt="HIMETA" class="project-img">
-                <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">Hierarchical meta-reinforcement learning (HiMeta)</div>
+                <div style="font-size: 14px; font-weight: 700; line-height: 1.3; color: #13294B; margin-bottom: 8px;">Hierarchical Meta-Reinforcement Learning via Automated Macro-Action Discovery (HiMeta)</div>
                 <div style="font-size: 11px; font-weight: 600; color: #57606a; background: #f1f4f8; padding: 4px 10px; border-radius: 12px; display: inline-block; border: 1px solid #d0d7de;">Adapting to Out-Of-Distributional Tasks</div>
                 <div class="card-topics">
                     <span style="font-size: 12px; font-weight: 700; color: #24292e; margin-right: 4px;">Topics:</span>
