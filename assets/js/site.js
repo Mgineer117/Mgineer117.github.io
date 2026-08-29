@@ -55,7 +55,7 @@
           0.055 * Math.sin(x * 11.3 - t * 0.11);
       },
       step: function (st, dt, t, W, H, ptr) {
-        var R = Math.min(W, H) * 0.46;
+        var R = ptr ? ptr.r : Math.min(W, H) * 0.46;
         for (var i = 0; i < st.agents.length; i++) {
           var a = st.agents[i];
           a.x += a.v * dt;
@@ -87,7 +87,7 @@
         }
       },
       pulse: function (st, x, y, W, H) {            /* a click gathers them in */
-        var R = Math.min(W, H) * 0.9;
+        var R = Math.max(340, Math.min(W, H) * 0.9);
         for (var i = 0; i < st.agents.length; i++) {
           var a = st.agents[i];
           var dx = x - a.x * W, dy = y - a.y * H;
@@ -158,7 +158,7 @@
              + Math.sin((nx + ny) * 2.2 + t * 0.06) * 0.9;
       },
       seed: function (W, H) {
-        var n = W < 620 ? 14 : W < 1000 ? 22 : 32;
+        var n = W < 620 ? 18 : W < 1000 ? 30 : 44;
         var agents = [];
         for (var i = 0; i < n; i++) agents.push(this.spawn(W, H, true));
         return { agents: agents };
@@ -175,7 +175,7 @@
         };
       },
       step: function (st, dt, t, W, H, ptr) {
-        var R = Math.min(W, H) * 0.34;
+        var R = ptr ? ptr.r : Math.min(W, H) * 0.5;
         for (var i = 0; i < st.agents.length; i++) {
           var a = st.agents[i];
           var ang = this.angle(a.x, a.y, t, W, H);
@@ -189,8 +189,8 @@
               var f = (1 - d / R) * ptr.active;
               /* pull toward the pointer, with enough swirl to spiral rather
                  than fall straight in */
-              a.x += (-dx / d) * f * 58 * dt + (-dy / d) * f * 82 * dt;
-              a.y += (-dy / d) * f * 58 * dt + ( dx / d) * f * 82 * dt;
+              a.x += (-dx / d) * f * 72 * dt + (-dy / d) * f * 108 * dt;
+              a.y += (-dy / d) * f * 72 * dt + ( dx / d) * f * 108 * dt;
             }
           }
 
@@ -203,7 +203,7 @@
         }
       },
       pulse: function (st, x, y, W, H) {            /* a click draws them in */
-        var R = Math.min(W, H) * 0.95;
+        var R = Math.max(360, Math.min(W, H) * 0.95);
         for (var i = 0; i < st.agents.length; i++) {
           var a = st.agents[i];
           var dx = x - a.x, dy = y - a.y;
@@ -467,7 +467,7 @@
     var W = 0, H = 0, dpr = 1, t = 0;                /* text and gets no events    */
     var raf = null, visible = true, state = null;
 
-    var ptr = { x: 0, y: 0, inside: false, active: 0, rings: [] };
+    var ptr = { x: 0, y: 0, inside: false, active: 0, rings: [], r: 240 };
 
     function resize() {
       var rect = canvas.getBoundingClientRect();
@@ -478,6 +478,10 @@
       canvas.width = Math.round(W * dpr);
       canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      /* The section covers are about half the height of the home cover, so a
+         radius taken from min(W, H) collapses and the field stops reacting.
+         Floor it, and never let it swallow the whole width. */
+      ptr.r = Math.max(240, Math.min(Math.min(W, H) * 0.6, W * 0.34));
       state = field.seed(W, H);
     }
 
