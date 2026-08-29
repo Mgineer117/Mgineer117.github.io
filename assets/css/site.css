@@ -237,6 +237,12 @@ html.reveal-on .reveal.is-in {
   color: rgba(255,255,255,.5);
   margin-top: 12px;
 }
+/* the hanja form, a shade back from the hangul it sits beside */
+.hero__name .hero__ko i {
+  font-style: normal;
+  color: rgba(255, 255, 255, .34);
+  margin-left: .35em;
+}
 
 .hero__role {
   margin: 20px 0 0;
