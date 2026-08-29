@@ -11,11 +11,15 @@
   /* ------------------------------------------------------------------ */
   /* Hero fields                                                         */
   /*                                                                     */
-  /* One tiny canvas engine, one field per section, picked with          */
-  /* data-field on the canvas. Each field is {seed, step, draw, settle}: */
-  /* seed builds state for the current size, step advances it, draw      */
-  /* paints it, settle is how many frames to pre-run for a static frame  */
-  /* under prefers-reduced-motion.                                       */
+  /* One canvas engine, one field per section, picked with data-field on */
+  /* the canvas. A field is {seed, step, draw, pulse, settle}: seed       */
+  /* builds state for the current size, step advances it, draw paints it, */
+  /* pulse reacts to a click, settle is how many frames to pre-run for a  */
+  /* static frame under prefers-reduced-motion.                          */
+  /*                                                                     */
+  /* Every step/draw also receives `ptr`, the pointer over the cover:     */
+  /* {x, y, inside, active} in canvas pixels, where active eases 0..1 so  */
+  /* the field relaxes rather than snapping when the pointer leaves.      */
   /* ------------------------------------------------------------------ */
 
   var BLUE = "138,183,255";
@@ -23,7 +27,8 @@
 
   var FIELDS = {
 
-    /* home — perturbed trajectories contracting onto a reference path */
+    /* home — trajectories contracting onto a reference path.
+       The pointer is a disturbance: push them off and watch them come back. */
     contract: {
       settle: 240,
       seed: function (W) {
@@ -48,19 +53,45 @@
           0.155 * Math.sin(x * 5.6 + t * 0.16) +
           0.055 * Math.sin(x * 11.3 - t * 0.11);
       },
-      step: function (st, dt, t) {
+      step: function (st, dt, t, W, H, ptr) {
+        var R = Math.min(W, H) * 0.42;
         for (var i = 0; i < st.agents.length; i++) {
           var a = st.agents[i];
           a.x += a.v * dt;
-          if (a.x > a.nextKick) {                    /* a disturbance, so the */
-            a.y += (Math.random() - 0.5) * 0.42;     /* pull back is visible  */
+
+          if (a.x > a.nextKick) {                    /* an autonomous disturbance */
+            a.y += (Math.random() - 0.5) * 0.42;
             a.nextKick = a.x + 0.4 + Math.random() * 0.7;
           }
+
+          if (ptr && ptr.active > 0.01) {            /* and one from the pointer */
+            var dx = a.x * W - ptr.x, dy = a.y * H - ptr.y;
+            var d = Math.sqrt(dx * dx + dy * dy);
+            if (d < R) {
+              var f = (1 - d / R) * ptr.active;
+              a.y += (dy >= 0 ? 1 : -1) * f * f * 1.15 * dt;
+              a.x += f * f * 0.05 * dt;
+            }
+          }
+
           a.y += (this.ref(a.x, t) - a.y) * (1 - Math.exp(-a.k * dt));
-          a.y = Math.max(-0.15, Math.min(1.15, a.y));
+          a.y = Math.max(-0.2, Math.min(1.2, a.y));
           a.trail.push(a.x, a.y);
           if (a.trail.length > 64) a.trail.splice(0, 2);
           if (a.x > 1.12) st.agents[i] = this.spawn(false);
+        }
+      },
+      pulse: function (st, x, y, W, H) {
+        var R = Math.min(W, H) * 0.75;
+        for (var i = 0; i < st.agents.length; i++) {
+          var a = st.agents[i];
+          var dx = a.x * W - x, dy = a.y * H - y;
+          var d = Math.sqrt(dx * dx + dy * dy);
+          if (d < R) {
+            var f = 1 - d / R;
+            a.y += (dy >= 0 ? 1 : -1) * f * 0.34;
+            a.y = Math.max(-0.2, Math.min(1.2, a.y));
+          }
         }
       },
       draw: function (ctx, st, t, W, H) {
@@ -109,7 +140,8 @@
       }
     },
 
-    /* publications — streamlines through a slowly turning phase field */
+    /* publications — streamlines through a turning phase field.
+       The pointer adds a local vortex; a click scatters it. */
     flow: {
       settle: 200,
       angle: function (x, y, t, W, H) {
@@ -135,12 +167,24 @@
           lead: Math.random() < 0.15
         };
       },
-      step: function (st, dt, t, W, H) {
+      step: function (st, dt, t, W, H, ptr) {
+        var R = Math.min(W, H) * 0.34;
         for (var i = 0; i < st.agents.length; i++) {
           var a = st.agents[i];
           var ang = this.angle(a.x, a.y, t, W, H);
           a.x += Math.cos(ang) * a.sp * dt;
           a.y += Math.sin(ang) * a.sp * dt;
+
+          if (ptr && ptr.active > 0.01) {
+            var dx = a.x - ptr.x, dy = a.y - ptr.y;
+            var d = Math.sqrt(dx * dx + dy * dy);
+            if (d > 0.5 && d < R) {
+              var f = (1 - d / R) * ptr.active;
+              a.x += (-dy / d) * f * 78 * dt + (dx / d) * f * 26 * dt;   /* swirl + push out */
+              a.y += ( dx / d) * f * 78 * dt + (dy / d) * f * 26 * dt;
+            }
+          }
+
           a.life += dt;
           a.trail.push(a.x, a.y);
           if (a.trail.length > 34) a.trail.splice(0, 2);
@@ -149,12 +193,25 @@
           }
         }
       },
+      pulse: function (st, x, y, W, H) {
+        var R = Math.min(W, H) * 0.8;
+        for (var i = 0; i < st.agents.length; i++) {
+          var a = st.agents[i];
+          var dx = a.x - x, dy = a.y - y;
+          var d = Math.sqrt(dx * dx + dy * dy) || 1;
+          if (d < R) {
+            var f = (1 - d / R) * 46;
+            a.x += (dx / d) * f;
+            a.y += (dy / d) * f;
+            a.trail.length = 0;
+          }
+        }
+      },
       draw: function (ctx, st) {
         ctx.lineCap = "round";
         for (var i = 0; i < st.agents.length; i++) {
           var a = st.agents[i], pts = a.trail;
           if (pts.length < 4) continue;
-          /* fade in at birth, out at death, so nothing pops */
           var e = a.life / a.maxLife;
           var env = Math.min(1, e * 6) * Math.min(1, (1 - e) * 4);
           var hue = a.lead ? ACCENT : BLUE;
@@ -177,7 +234,8 @@
       }
     },
 
-    /* projects — interfering wavefronts (the PDE and multi-phase flow work) */
+    /* projects — interfering wavefronts. The pointer is a live source and a
+       click drops a lasting one, so you can build up your own interference. */
     waves: {
       settle: 120,
       seed: function (W, H) {
@@ -187,38 +245,63 @@
             { bx: W * 0.62, by: H * 0.34, sp: 48, lead: true },
             { bx: W * 0.86, by: H * 0.74, sp: 71, lead: false }
           ],
+          drops: [],
           maxR: Math.max(W, H) * 0.78
         };
       },
-      step: function () { /* fully parameterised by t */ },
-      draw: function (ctx, st, t, W, H) {
+      step: function (st, dt) {
+        for (var i = st.drops.length - 1; i >= 0; i--) {
+          st.drops[i].age += dt;
+          if (st.drops[i].age > 6) st.drops.splice(i, 1);
+        }
+      },
+      pulse: function (st, x, y) {
+        st.drops.push({ x: x, y: y, age: 0 });
+        if (st.drops.length > 6) st.drops.shift();
+      },
+      rings: function (ctx, cx, cy, phase, maxR, rgb, gain) {
+        var gap = maxR / 7;
+        for (var k = 0; k < 8; k++) {
+          var r = (phase + k * gap) % maxR;
+          if (r < 4) continue;
+          var a = 1 - r / maxR;
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 0, Math.PI * 2);
+          ctx.strokeStyle = "rgba(" + rgb + "," + (a * a * gain).toFixed(3) + ")";
+          ctx.stroke();
+        }
+      },
+      draw: function (ctx, st, t, W, H, ptr) {
         ctx.globalCompositeOperation = "lighter";
         ctx.lineWidth = 1.05;
+
         for (var i = 0; i < st.src.length; i++) {
           var s = st.src[i];
           var cx = s.bx + Math.sin(t * 0.07 + i * 2.1) * W * 0.035;
           var cy = s.by + Math.cos(t * 0.05 + i * 1.4) * H * 0.045;
-          var gap = st.maxR / 7;
-          for (var k = 0; k < 8; k++) {
-            var r = (t * s.sp + k * gap) % st.maxR;
-            if (r < 4) continue;
-            var a = (1 - r / st.maxR);
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, 0, Math.PI * 2);
-            ctx.strokeStyle = "rgba(" + (s.lead ? ACCENT : BLUE) + "," +
-              (a * a * (s.lead ? 0.16 : 0.13)).toFixed(3) + ")";
-            ctx.stroke();
-          }
+          this.rings(ctx, cx, cy, t * s.sp, st.maxR, s.lead ? ACCENT : BLUE, s.lead ? 0.16 : 0.13);
           ctx.beginPath();
           ctx.arc(cx, cy, 2.2, 0, Math.PI * 2);
           ctx.fillStyle = s.lead ? "rgba(232,74,39,0.75)" : "rgba(190,215,255,0.55)";
           ctx.fill();
         }
+
+        for (var d = 0; d < st.drops.length; d++) {          /* clicked sources */
+          var dr = st.drops[d];
+          var fade = Math.max(0, 1 - dr.age / 6);
+          this.rings(ctx, dr.x, dr.y, dr.age * 96, st.maxR * 0.8, ACCENT, 0.26 * fade);
+        }
+
+        if (ptr && ptr.active > 0.01) {                      /* the pointer itself */
+          this.rings(ctx, ptr.x, ptr.y, t * 84, st.maxR * 0.55, BLUE, 0.2 * ptr.active);
+        }
+
         ctx.globalCompositeOperation = "source-over";
       }
     },
 
-    /* teaching — orbits and rigid-body traces (AE352 / AE353) */
+    /* teaching — orbits. The pointer pulls the primary, so the whole system
+       leans toward it; a click re-phases every body at once. */
     orbits: {
       settle: 260,
       seed: function (W, H) {
@@ -236,9 +319,23 @@
             lead: i === 2
           });
         }
-        return { orbits: orbits, cx: W * 0.5, cy: H * 0.52 };
+        return { orbits: orbits, cx: W * 0.5, cy: H * 0.52, hx: W * 0.5, hy: H * 0.52 };
       },
-      step: function () { /* fully parameterised by t */ },
+      step: function (st, dt, t, W, H, ptr) {
+        var tx = W * 0.5, ty = H * 0.52;
+        if (ptr && ptr.active > 0.01) {
+          tx += (ptr.x - W * 0.5) * 0.3 * ptr.active;
+          ty += (ptr.y - H * 0.52) * 0.3 * ptr.active;
+        }
+        var k = 1 - Math.exp(-2.2 * dt);
+        st.cx += (tx - st.cx) * k;
+        st.cy += (ty - st.cy) * k;
+      },
+      pulse: function (st) {
+        for (var i = 0; i < st.orbits.length; i++) {
+          st.orbits[i].phase += (Math.random() - 0.5) * 2.4;
+        }
+      },
       at: function (o, ang, st) {
         var x = o.a * Math.cos(ang), y = o.b * Math.sin(ang);
         var c = Math.cos(o.rot), s = Math.sin(o.rot);
@@ -285,30 +382,53 @@
       }
     },
 
-    /* blog — one continuous curve, drawn like a plotter and slowly evolving */
+    /* blog — one continuous curve drawn like a plotter. The pen follows the
+       pointer; a click changes the figure it is drawing. */
     trace: {
       settle: 900,
       seed: function (W, H) {
-        return { pts: [], p: 0, cx: W * 0.5, cy: H * 0.52, rx: W * 0.34, ry: H * 0.30 };
+        return {
+          pts: [], p: 0,
+          cx: W * 0.5, cy: H * 0.52,
+          rx: W * 0.34, ry: H * 0.30,
+          fx: 1.00, fy: 1.41
+        };
       },
-      step: function (st, dt, t) {
-        var steps = 6;                       /* sub-sample so the line is smooth */
+      step: function (st, dt, t, W, H, ptr) {
+        var tx = W * 0.5, ty = H * 0.52, scale = 1;
+        if (ptr && ptr.active > 0.01) {
+          tx += (ptr.x - W * 0.5) * 0.45 * ptr.active;
+          ty += (ptr.y - H * 0.52) * 0.45 * ptr.active;
+          scale = 1 - 0.22 * ptr.active;
+        }
+        var k = 1 - Math.exp(-1.6 * dt);
+        st.cx += (tx - st.cx) * k;
+        st.cy += (ty - st.cy) * k;
+        st.rx += (W * 0.34 * scale - st.rx) * k;
+        st.ry += (H * 0.30 * scale - st.ry) * k;
+
+        var steps = 6;
         for (var i = 0; i < steps; i++) {
           st.p += (dt / steps) * 0.85;
-          var d = 0.9 + Math.sin(t * 0.045) * 0.7;      /* the figure morphs */
+          var d = 0.9 + Math.sin(t * 0.045) * 0.7;
           st.pts.push(
-            st.cx + st.rx * Math.sin(st.p * 1.00 + d),
-            st.cy + st.ry * Math.sin(st.p * 1.41)
+            st.cx + st.rx * Math.sin(st.p * st.fx + d),
+            st.cy + st.ry * Math.sin(st.p * st.fy)
           );
         }
         while (st.pts.length > 1500) st.pts.splice(0, 2);
+      },
+      pulse: function (st) {
+        var ratios = [1.41, 1.5, 2, 2.5, 3, 0.75, 1.25];
+        st.fy = ratios[Math.floor(Math.random() * ratios.length)];
+        st.fx = Math.random() < 0.5 ? 1 : 1.5;
       },
       draw: function (ctx, st) {
         var pts = st.pts, n = pts.length;
         if (n < 6) return;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
-        var chunk = 2;                       /* stroke every other segment */
+        var chunk = 2;
         for (var j = 2; j < n; j += chunk * 2) {
           var f = j / n;
           ctx.beginPath();
@@ -332,9 +452,13 @@
     var canvas = document.getElementById("hero-field");
     if (!canvas || !canvas.getContext) return;
 
+    var host = canvas.parentElement;                 /* the cover, not the canvas: */
     var field = FIELDS[canvas.getAttribute("data-field")] || FIELDS.contract;
-    var ctx = canvas.getContext("2d");
-    var W = 0, H = 0, dpr = 1, t = 0, raf = null, visible = true, state = null;
+    var ctx = canvas.getContext("2d");               /* the canvas sits behind the */
+    var W = 0, H = 0, dpr = 1, t = 0;                /* text and gets no events    */
+    var raf = null, visible = true, state = null;
+
+    var ptr = { x: 0, y: 0, inside: false, active: 0, rings: [] };
 
     function resize() {
       var rect = canvas.getBoundingClientRect();
@@ -348,9 +472,39 @@
       state = field.seed(W, H);
     }
 
-    function paint() {
+    /* the halo under the pointer, and the ring a click leaves behind — drawn
+       for every field so interactivity reads the same way across the site */
+    function drawPointer(dt) {
+      if (ptr.active > 0.015) {
+        ctx.beginPath();
+        ctx.arc(ptr.x, ptr.y, 26, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(255,255,255," + (0.16 * ptr.active).toFixed(3) + ")";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(ptr.x, ptr.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255," + (0.4 * ptr.active).toFixed(3) + ")";
+        ctx.fill();
+      }
+
+      for (var i = ptr.rings.length - 1; i >= 0; i--) {
+        var r = ptr.rings[i];
+        r.age += dt;
+        if (r.age > 0.85) { ptr.rings.splice(i, 1); continue; }
+        var e = r.age / 0.85;
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, 12 + e * 92, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(232,74,39," + ((1 - e) * 0.4).toFixed(3) + ")";
+        ctx.lineWidth = 1.4 * (1 - e) + 0.4;
+        ctx.stroke();
+      }
+    }
+
+    function paint(dt) {
       ctx.clearRect(0, 0, W, H);
-      field.draw(ctx, state, t, W, H);
+      field.draw(ctx, state, t, W, H, ptr);
+      drawPointer(dt);
     }
 
     var last = 0;
@@ -360,8 +514,9 @@
       var dt = Math.min((now - last) / 1000, 0.05);
       last = now;
       t += dt;
-      field.step(state, dt, t, W, H);
-      paint();
+      ptr.active += ((ptr.inside ? 1 : 0) - ptr.active) * (1 - Math.exp(-4 * dt));
+      field.step(state, dt, t, W, H, ptr);
+      paint(dt);
     }
 
     function start() {
@@ -373,12 +528,42 @@
       if (raf) { window.cancelAnimationFrame(raf); raf = null; }
     }
 
+    function track(e) {
+      var rect = canvas.getBoundingClientRect();
+      ptr.x = e.clientX - rect.left;
+      ptr.y = e.clientY - rect.top;
+      ptr.inside = ptr.x >= 0 && ptr.x <= rect.width && ptr.y >= 0 && ptr.y <= rect.height;
+    }
+
+    function bindPointer() {
+      if (!host) return;
+
+      host.addEventListener("pointermove", track, { passive: true });
+      host.addEventListener("pointerleave", function () { ptr.inside = false; }, { passive: true });
+
+      host.addEventListener("pointerdown", function (e) {
+        /* never steal a tap meant for a link, a button or a form control */
+        if (e.target.closest && e.target.closest("a, button, input, textarea, select, label")) return;
+        track(e);
+        if (!ptr.inside) return;
+        ptr.active = 1;
+        ptr.rings.push({ x: ptr.x, y: ptr.y, age: 0 });
+        if (ptr.rings.length > 5) ptr.rings.shift();
+        if (field.pulse) field.pulse(state, ptr.x, ptr.y, W, H);
+      }, { passive: true });
+
+      /* touch never fires pointerleave, so let the halo fade after a tap */
+      function release(e) { if (e.pointerType !== "mouse") ptr.inside = false; }
+      host.addEventListener("pointerup", release, { passive: true });
+      host.addEventListener("pointercancel", release, { passive: true });
+    }
+
     function begin() {
       if (reduceMotion) {
         var n = field.settle || 200;
-        for (var i = 0; i < n; i++) { t += 0.03; field.step(state, 0.03, t, W, H); }
-        paint();
-        return;
+        for (var i = 0; i < n; i++) { t += 0.03; field.step(state, 0.03, t, W, H, ptr); }
+        paint(0);
+        return;                       /* no interaction when motion is unwelcome */
       }
 
       var rt;
@@ -398,6 +583,7 @@
         }, { threshold: 0 }).observe(canvas);
       }
 
+      bindPointer();
       start();
     }
 
