@@ -388,8 +388,16 @@ redirect_from:
 
 <h2 style="color: #13294B; border-bottom: 1px solid #e1e4e8; padding-bottom: 10px;">📢 Recent News</h2>
 <ul style="line-height: 1.6; font-size: 16px;">
-    <li><strong>AIAA AVIATION 2026:</strong> Presenting <em>"Sparsity-based safety conservatism..."</em> in June 2026.</li>
+    <li><strong>IEEE T-RO 2026 (Aug. 2026):</strong> <em>"Contraction-Aware Reinforcement Learning for Nonlinear Control with Statistical Robustness"</em> accepted to IEEE Transactions on Robotics.</li>
+    <li><strong>AIAA AVIATION 2026 (June 2026):</strong> Presenting <em>"Sparsity-based safety conservatism..."</em> at the AIAA AVIATION Forum.</li>
+    <li><strong>Grant (2026):</strong> NSF ACCESS Discover Allocation (Role: PI) for <em>"Synthesis of Optimal and Contracting Policies for Safety-Critical Nonlinear Control"</em> &mdash; 750,000 compute credits (est. value $12,000).</li>
+    <li><strong>Award (2026):</strong> Best Poster Award, Midwest Robotics Workshop, for <em>"Contraction-Aware Reinforcement Learning for Nonlinear Control and Statistical Robustness."</em></li>
+    <li><strong>Award (2026):</strong> Silver Reviewer Award (top tier), International Conference on Machine Learning (ICML).</li>
     <li><strong>Mathematics 2025:</strong> <em>"Out of Distribution Adaptation..."</em> published in Mathematics: Stats & OR.</li>
+    <li><strong>Fellowship (2025):</strong> University Block Grant Fellowship (outstanding academic &amp; research achievement): $880, Dept. of Aerospace Engineering, UIUC.</li>
+    <li><strong>Award (2025):</strong> AE Graduate Research Poster Competition (Best Oral Delivery): $200, Dept. of Aerospace Engineering, UIUC.</li>
+    <li><strong>Fellowship (2024):</strong> Stillwell Fellowship: $12,555, Dept. of Aerospace Engineering, UIUC.</li>
+    <li><strong>Fellowship (2024):</strong> Beatty Fellowship: $6,000, Dept. of Aerospace Engineering, UIUC.</li>
     <li><strong>AAAI 2024:</strong> <em>"Constrained meta-reinforcement learning..."</em> published in Proceedings of AAAI.</li>
 </ul>
 
