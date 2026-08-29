@@ -744,11 +744,117 @@
     Array.prototype.forEach.call(els, function (el) { io.observe(el); });
   }
 
+  /* ----------------------------------------------------------------- paper --
+     A publication page is long and mathematical, so it gets three things a
+     scrolling reader actually uses: a contents list built from its own
+     headings, a marker for where you are in it, and a progress bar. All three
+     are additive — none of them is required for the prose to read correctly. */
+
+  function paper() {
+    var prose = document.getElementById("paper-prose");
+    if (!prose) return;
+
+    var bar = document.querySelector("#paper-progress i");
+    var toc = document.getElementById("paper-toc");
+    var list = toc ? toc.querySelector("ol") : null;
+
+    /* --- contents, from whatever headings the page happens to have --- */
+    var heads = prose.querySelectorAll("h2");
+    var links = [];
+    if (list && heads.length > 1) {
+      Array.prototype.forEach.call(heads, function (h, i) {
+        var text = (h.textContent || "").replace(/\s+/g, " ").trim();
+        if (!text) return;
+        if (!h.id) {
+          h.id = "sec-" + (text.toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "") || ("part-" + i));
+        }
+        var li = document.createElement("li");
+        var a = document.createElement("a");
+        a.href = "#" + h.id;
+        a.textContent = text;
+        li.appendChild(a);
+        list.appendChild(li);
+        links.push({ a: a, el: h });
+      });
+      if (links.length) toc.hidden = false;
+    }
+
+    /* --- progress, and which heading is current --- */
+    var ticking = false;
+    function frame() {
+      ticking = false;
+      var doc = document.documentElement;
+      var max = (doc.scrollHeight - window.innerHeight) || 1;
+      if (bar) {
+        var pct = Math.max(0, Math.min(1, window.pageYOffset / max));
+        bar.style.transform = "scaleX(" + pct + ")";
+      }
+      if (!links.length) return;
+      var mark = window.pageYOffset + (window.innerHeight * 0.28);
+      var current = 0;
+      for (var i = 0; i < links.length; i++) {
+        if (links[i].el.getBoundingClientRect().top + window.pageYOffset <= mark) current = i;
+      }
+      links.forEach(function (l, i) {
+        l.a.className = (i === current) ? "is-here" : "";
+      });
+    }
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(frame);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    frame();
+  }
+
+  /* Copy-to-clipboard for the citation block. One delegated handler replaces
+     the per-page scripts that each defined the same function and id. */
+  function copiers() {
+    document.addEventListener("click", function (e) {
+      var btn = e.target.closest ? e.target.closest("[data-copy]") : null;
+      if (!btn) return;
+      var src = document.querySelector(btn.getAttribute("data-copy"));
+      if (!src) return;
+      var text = (src.textContent || "").trim();
+      var done = function (ok) {
+        var was = btn.textContent;
+        btn.textContent = ok ? "Copied" : "Press \u2318C";
+        btn.classList.add("is-copied");
+        setTimeout(function () {
+          btn.textContent = was;
+          btn.classList.remove("is-copied");
+        }, 1800);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+      } else {
+        /* Older Safari and any non-secure context land here. */
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = false;
+        try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
+        document.body.removeChild(ta);
+        done(ok);
+      }
+    });
+  }
+
   function init() {
     heroField();
     reel();
     filters();
     news();
+    paper();
+    copiers();
     reveal();
   }
 
