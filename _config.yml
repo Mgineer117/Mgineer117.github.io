@@ -84,6 +84,22 @@ publication_category:
   journals:
     title: 'Journal Articles'
 
+# Publication comments — Firebase Auth (name + password) + Firestore.
+# Copy these values from Firebase console > Project settings > Your apps > SDK setup.
+# While apiKey is blank the comment box is not rendered at all.
+# Full setup steps: COMMENTS_SETUP.md
+firebase:
+  apiKey                 : ""
+  authDomain             : ""
+  projectId              : ""
+  appId                  : ""
+  storageBucket          : ""
+  messagingSenderId      : ""
+  collection             : "comments"
+  # Commenters only ever type a name; it is mapped to name@<guestDomain>
+  # internally so Firebase Auth can hold the password. Nothing is emailed.
+  guestDomain            : "guests.mgineer117.github.io"
+
 # Site Settings
 teaser                   :  # filename of teaser fallback teaser image placed in /images/, .e.g. "500x300.png"
 breadcrumbs              : false # true, false (default)

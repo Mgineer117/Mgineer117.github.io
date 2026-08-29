@@ -1,0 +1,73 @@
+rules_version = '2';
+
+// Security rules for the publication comment boxes.
+//
+// Identity comes from Firebase Auth: a commenter picks a name and a password,
+// the site maps the name to a synthetic email, and Firebase stores the password
+// (hashed, salted, rate-limited). No password or hash ever reaches Firestore,
+// so there is nothing here for a reader to copy and replay.
+//
+// Deploy:  Firebase console > Firestore Database > Rules > paste > Publish
+//   or:    firebase deploy --only firestore:rules
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // The site owner: any uid listed under /admins can delete any comment.
+    function isAdmin() {
+      return isSignedIn()
+          && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function shapeOk() {
+      let d = request.resource.data;
+      return d.keys().hasAll(['page', 'name', 'uid', 'body', 'createdAt'])
+          && d.keys().hasOnly(['page', 'name', 'uid', 'body', 'createdAt', 'updatedAt'])
+          && d.page is string && d.page.size() > 0    && d.page.size() <= 200
+          && d.name is string && d.name.size() > 0    && d.name.size() <= 40
+          && d.body is string && d.body.size() > 0    && d.body.size() <= 4000
+          && d.uid  is string && d.uid == request.auth.uid;
+    }
+
+    // Public so the page can tell whether the current visitor is an owner.
+    // A uid on its own grants nothing without the matching password.
+    // Add or remove entries from the Firebase console only.
+    match /admins/{uid} {
+      allow read:  if true;
+      allow write: if false;
+    }
+
+    match /comments/{commentId} {
+
+      allow read: if true;
+
+      allow create: if isSignedIn()
+                    && shapeOk()
+                    && request.resource.data.createdAt == request.time
+                    && request.resource.data.updatedAt == null;
+
+      // Only the author may revise, and only the body may change.
+      allow update: if isSignedIn()
+                    && resource.data.uid == request.auth.uid
+                    && shapeOk()
+                    && request.resource.data.uid       == resource.data.uid
+                    && request.resource.data.page      == resource.data.page
+                    && request.resource.data.name      == resource.data.name
+                    && request.resource.data.createdAt == resource.data.createdAt
+                    && request.resource.data.updatedAt == request.time;
+
+      // The author, or the site owner.
+      allow delete: if isSignedIn()
+                    && (resource.data.uid == request.auth.uid || isAdmin());
+    }
+
+    // Nothing else is reachable from the browser.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

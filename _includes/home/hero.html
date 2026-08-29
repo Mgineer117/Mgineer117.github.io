@@ -1,0 +1,68 @@
+{% include base_path %}
+{% assign journal_count = site.publications | where: "category", "journals" | size %}
+
+<header class="hero" role="banner">
+  <canvas id="hero-field" class="hero__canvas" data-field="contract" aria-hidden="true"></canvas>
+  <div class="hero__grid" aria-hidden="true"></div>
+  <div class="hero__vignette" aria-hidden="true"></div>
+
+  <div class="wrap hero__inner">
+    <div class="hero__text">
+      <p class="eyebrow">Ph.D. Student &middot; Aerospace Engineering</p>
+
+      <h1 class="hero__name">
+        MJ (Minjae) Cho
+        <span class="hero__ko">조민재</span>
+      </h1>
+
+      <p class="hero__role">
+        <strong>University of Illinois Urbana-Champaign</strong><br>
+        <a href="https://tran.aerospace.illinois.edu/" target="_blank" rel="noopener">Lab for Intelligent Robots and Agents</a>,
+        advised by <a href="https://tran.aerospace.illinois.edu/team/" target="_blank" rel="noopener">Prof. Huy T. Tran</a>
+      </p>
+
+      <p class="hero__lede">
+        I build control policies for nonlinear robotic systems at the intersection of
+        reinforcement learning and control theory &mdash; and I care most about what they do
+        once the disturbances, the tasks, and the data stop looking like training.
+      </p>
+
+      <div class="hero__cta">
+        <a class="btn-x btn-x--onDark" href="#work">See the work</a>
+        <a class="btn-x btn-x--onDarkGhost" href="{{ base_path }}/publications/">Publications</a>
+        <a class="btn-x btn-x--onDarkGhost" href="{{ base_path }}/cv/">CV</a>
+      </div>
+
+      <div class="hero__meta">
+        <div class="hero__stat">
+          <b>{{ site.publications | size }}</b>
+          <span>Papers</span>
+        </div>
+        <div class="hero__stat">
+          <b>{{ journal_count }}</b>
+          <span>Journal articles</span>
+        </div>
+        <div class="hero__stat">
+          <b>T&#8209;RO &middot; AAAI</b>
+          <span>Recent venues</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero__portrait">
+      <div class="hero__portrait-frame">
+        <picture>
+          <source srcset="{{ base_path }}/images/mj_portrait-660.webp" type="image/webp">
+          <img src="{{ base_path }}/images/mj_portrait-660.jpg"
+               width="660" height="708"
+               alt="Portrait of MJ (Minjae) Cho" fetchpriority="high" decoding="async">
+        </picture>
+        <div class="hero__portrait-tag">Urbana&ndash;Champaign, IL</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <p class="hero__scroll"><i aria-hidden="true"></i> Scroll</p>
+  </div>
+</header>

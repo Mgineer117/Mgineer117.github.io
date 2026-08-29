@@ -3,25 +3,18 @@ layout: archive
 title: "Teaching"
 permalink: /teaching/
 author_profile: true
+hero:
+  kind: teaching
+  field: orbits
+  eyebrow: "Aerospace Engineering, UIUC"
+  lede: "Courses I have supported as a teaching assistant, in dynamical systems and control."
 ---
 
 {% include base_path %}
 
-<style>
-  #teaching-container {
-    display: block !important;
-    width: 100% !important;
-    clear: both !important;
-    margin-top: 30px;
-  }
-  @media (max-width: 600px) {
-    .teaching-card { flex-direction: column !important; gap: 15px !important; }
-    .teaching-icon { flex: 0 0 70px !important; width: 100% !important; min-height: 70px !important; }
-  }
-</style>
-
 <div id="teaching-container">
-  {% for post in site.teaching reversed %}
+  {% assign sorted_teaching = site.teaching | sort: "date" | reverse %}
+  {% for post in sorted_teaching %}
     {% include archive-single-teaching.html %}
   {% endfor %}
 </div>

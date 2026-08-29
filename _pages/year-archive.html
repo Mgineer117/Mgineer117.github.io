@@ -1,19 +1,38 @@
 ---
 layout: archive
 permalink: /year-archive/
-title: "Blog posts"
+title: "Blog"
 author_profile: true
+hero:
+  field: trace
+  eyebrow: "Notes & writing"
+  lede: "Occasional writing on research, control, and academic life."
 redirect_from:
   - /wordpress/blog-posts/
 ---
 
 {% include base_path %}
-{% capture written_year %}'None'{% endcapture %}
-{% for post in site.posts %}
-  {% capture year %}{{ post.date | date: '%Y' }}{% endcapture %}
-  {% if year != written_year %}
-    <h2 id="{{ year | slugify }}" class="archive__subtitle">{{ year }}</h2>
-    {% capture written_year %}{{ year }}{% endcapture %}
-  {% endif %}
-  {% include archive-single.html %}
-{% endfor %}
+
+{% if site.posts.size == 0 %}
+
+  <div class="empty-state">
+    <p class="empty-state__tag">TBA</p>
+    <p class="empty-state__body">
+      Nothing published here yet. In the meantime, the
+      <a href="{{ base_path }}/publications/">publications</a> carry the technical write-ups.
+    </p>
+  </div>
+
+{% else %}
+
+  {% capture written_year %}'None'{% endcapture %}
+  {% for post in site.posts %}
+    {% capture year %}{{ post.date | date: '%Y' }}{% endcapture %}
+    {% if year != written_year %}
+      <h2 id="{{ year | slugify }}" class="archive__subtitle">{{ year }}</h2>
+      {% capture written_year %}{{ year }}{% endcapture %}
+    {% endif %}
+    {% include archive-single.html %}
+  {% endfor %}
+
+{% endif %}

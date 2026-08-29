@@ -20,7 +20,7 @@
 <!-- Google Fonts: Inter -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <!-- Custom Micro-animations -->
 <style>
@@ -45,5 +45,25 @@
     transition: color 0.15s ease-in-out;
   }
 </style>
+
+<!-- Custom design layer (must load after main.css) -->
+<link rel="stylesheet" href="{{ base_path }}/assets/css/site.css"/>
+<script>
+  /* Arm the scroll-reveal before first paint. If site.js never runs, the timeout
+     disarms it so content can't be left invisible. */
+  (function () {
+    var d = document.documentElement;
+    try {
+      if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    } catch (e) { return; }
+    d.className += " reveal-on";
+    window.setTimeout(function () {
+      if (d.className.indexOf("reveal-ready") < 0) {
+        d.className = d.className.replace(" reveal-on", "");
+      }
+    }, 2000);
+  })();
+</script>
+<script src="{{ base_path }}/assets/js/site.js" defer></script>
 
 <!-- end custom head snippets -->

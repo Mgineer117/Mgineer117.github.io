@@ -1,0 +1,67 @@
+{% include base_path %}
+
+<section class="cbox" id="comments" aria-labelledby="cbox-title">
+  <div class="cbox__head">
+    <h2 id="cbox-title">Discussion</h2>
+    <span class="cbox__count" id="cbox-count" hidden></span>
+  </div>
+
+  <script type="application/json" id="cbox-config">
+    {
+      "apiKey": {{ site.firebase.apiKey | default: "" | jsonify }},
+      "authDomain": {{ site.firebase.authDomain | default: "" | jsonify }},
+      "projectId": {{ site.firebase.projectId | default: "" | jsonify }},
+      "appId": {{ site.firebase.appId | default: "" | jsonify }},
+      "storageBucket": {{ site.firebase.storageBucket | default: "" | jsonify }},
+      "messagingSenderId": {{ site.firebase.messagingSenderId | default: "" | jsonify }},
+      "collection": {{ site.firebase.collection | default: "comments" | jsonify }},
+      "guestDomain": {{ site.firebase.guestDomain | default: "guests.invalid" | jsonify }},
+      "page": {{ page.url | jsonify }}
+    }
+  </script>
+
+  <!-- signed-in bar -->
+  <div class="cbox__who" id="cbox-who" hidden>
+    <span>Commenting as <b id="cbox-who-name"></b><span class="cbox__admin" id="cbox-admin" hidden>site owner</span></span>
+    <button type="button" class="cbox__linkbtn" id="cbox-signout">Sign out</button>
+  </div>
+
+  <form class="cbox__form" id="cbox-form" novalidate>
+    <div class="cbox__ids" id="cbox-ids">
+      <label class="cbox__field">
+        <span>Name</span>
+        <input type="text" id="cbox-name" name="name" autocomplete="nickname"
+               maxlength="40" placeholder="How you want to be credited">
+      </label>
+      <label class="cbox__field">
+        <span>Password</span>
+        <input type="password" id="cbox-pass" name="password" autocomplete="current-password"
+               minlength="6" placeholder="At least 6 characters">
+      </label>
+    </div>
+
+    <p class="cbox__hint" id="cbox-hint">
+      Pick any name and password. Use the same pair again later to edit or delete what you wrote.
+      Don't reuse a password that matters &mdash; this only guards your comment.
+    </p>
+
+    <label class="cbox__field">
+      <span class="cbox__sr">Comment</span>
+      <textarea id="cbox-body" name="body" rows="4" maxlength="4000"
+                placeholder="Questions and corrections welcome."></textarea>
+    </label>
+
+    <div class="cbox__actions">
+      <button type="submit" class="btn-x btn-x--sm" id="cbox-submit">Post comment</button>
+      <span class="cbox__status" id="cbox-status" role="status" aria-live="polite"></span>
+    </div>
+
+    <p class="cbox__error" id="cbox-error" role="alert" hidden></p>
+  </form>
+
+  <ol class="cbox__list" id="cbox-list"></ol>
+  <p class="cbox__empty" id="cbox-empty" hidden>No comments yet.</p>
+  <p class="cbox__error" id="cbox-fatal" role="alert" hidden></p>
+</section>
+
+<script type="module" src="{{ base_path }}/assets/js/comments.js"></script>
