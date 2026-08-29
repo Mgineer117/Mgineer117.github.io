@@ -89,12 +89,12 @@ publication_category:
 # While apiKey is blank the comment box is not rendered at all.
 # Full setup steps: COMMENTS_SETUP.md
 firebase:
-  apiKey                 : ""
-  authDomain             : ""
-  projectId              : ""
-  appId                  : ""
-  storageBucket          : ""
-  messagingSenderId      : ""
+  apiKey                 : "AIzaSyBl76h4Oq0OOulgsrvl8ItpEcLUhZyTA8U"
+  authDomain             : "mgineer117-site.firebaseapp.com"
+  projectId              : "mgineer117-site"
+  appId                  : "1:255433460213:web:99ade9f625410d857cf8bc"
+  storageBucket          : "mgineer117-site.firebasestorage.app"
+  messagingSenderId      : "255433460213"
   collection             : "comments"
   # Commenters only ever type a name; it is mapped to name@<guestDomain>
   # internally so Firebase Auth can hold the password. Nothing is emailed.
