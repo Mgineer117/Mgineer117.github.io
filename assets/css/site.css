@@ -1218,3 +1218,31 @@ html.reveal-on .reveal.is-in {
 .cbox__linkbtn--danger:hover { color: #7c2d12; }
 
 .cbox__empty { margin: 26px 0 0; font-size: 15px; color: var(--steel-2); }
+
+/* --------------------------------------------------------------------------
+   Sidebar (author profile)
+
+   The theme pins it with `position: fixed` above 1024px and no `top` value.
+   Two things go wrong. Fixed positioning resolves its width against the
+   viewport instead of #main, so past #main's max-width it grows wider than
+   the 2/12 gutter reserved for it and overlaps the content column. And its
+   static position sits wherever #main begins — which, now that section pages
+   open with a cover, is far down the page, so it hangs there instead of
+   following the scroll.
+
+   Sticky fixes both: the element stays in flow, so susy's span(2 of 12) still
+   resolves against #main, and it tracks the page under the masthead.
+   -------------------------------------------------------------------------- */
+
+@media screen and (min-width: 1024px) {
+  .sidebar {
+    position: sticky;
+    top: calc(70px + 1.5rem);
+    height: auto;
+    max-height: calc(100vh - 70px - 3rem);
+    margin-top: 0;
+    padding-top: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
