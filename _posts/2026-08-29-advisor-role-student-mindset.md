@@ -4,50 +4,46 @@ date: 2026-08-29
 tags:
   - advising
   - phd
-excerpt: "Something I hear often is that an advisor doesn't know a student's topic well enough to teach them anything. I think the word *learn* is doing different work in a PhD than we expect it to."
+excerpt: "A complaint I hear often: my advisor doesn't know my topic well enough to teach me anything. I think the word *learn* means something different in a PhD, and that changes the whole picture."
 ---
 
-Something I have heard in more than one conversation is that an advisor doesn't
-know enough about a student's topic to teach them anything. I understand the
-feeling, and I don't think the people who say it are being unfair — it usually
-comes from someone working hard on a problem and finding that the person meant
-to help cannot follow all of it.
+I have heard this in more than one conversation: *my advisor doesn't know my
+topic well enough to teach me anything.* I understand the feeling. It usually
+comes from someone working hard on a problem, who finds that the person meant to
+help cannot follow all of it.
 
-Over time I have come to read it differently. I think the word *learn* is doing
-different work in a PhD than it does in a classroom, and once that lands, the
-relationship becomes much easier to be in.
+But I have come to see it differently. I think the word *learn* means something
+different in a PhD than it does in a class. Once that becomes clear, the
+relationship gets much easier.
 
-## The advisor is not expected to know your problem
+## Your advisor is not expected to know your problem
 
-Think about what a professor's own PhD looked like. It went deep — into one
-thesis, one set of questions, one corner of a field. A postdoc goes deeper
-still. That depth is the point of the degree, and it is paid for with breadth.
+Think about what your professor's own PhD looked like. It went deep into one
+thesis, one set of questions, one small corner of a field. A postdoc goes deeper
+still. That depth is the point of the degree. The price of it is breadth.
 
 Your work sits somewhere else. If your advisor is a junior professor, their
-thesis is recent enough that we expect it to overlap with yours, and often it
-simply doesn't. Even where the topics are close, the particular tools you are
-using may be tools you picked up and they did not. So it seems natural to me
-that an advisor cannot follow every step, and cannot hand you a verdict on the
-derivation you spent last week on.
+thesis is recent, so we expect it to overlap with yours. Often it does not. Even
+when the topics are close, the tools you use may be tools you picked up and they
+did not. So it makes sense to me that an advisor cannot follow every step, and
+cannot tell you whether the derivation you spent last week on is right.
 
-I don't read that as a shortcoming. In a group that is working well, it means
-the student has gone somewhere the advisor hasn't, which is what we are aiming
-for in the end.
+I do not see that as a weakness. In a group that is working well, it means the
+student has gone somewhere the advisor has not. That is the goal.
 
 ## What the student can do
 
-Four things, and I think they all sit on the student's side.
+Four things, and I think they are all on the student's side.
 
-**Understand the situation.** If you are waiting for someone to check your work
-line by line, the wait is likely to be a long one, and the frustration that
-builds in the meantime is mostly self-inflicted. It is a much calmer place to
-work from once you stop expecting it.
+**Accept the situation.** If you are waiting for someone to check your work line
+by line, you will wait a long time. Most of the frustration in that wait is
+something we do to ourselves. It is a much calmer place to work from once you
+stop expecting it.
 
-**Ask the kind of question your advisor can answer.** This is the part I would
-most want to pass on to someone starting out, because it is a small change in
-phrasing that changes what comes back.
+**Ask questions your advisor can answer.** This is the part I would most want to
+pass on. It is a small change in wording, and it changes what you get back.
 
-Rather than:
+Instead of:
 
 > Is A correct?
 
@@ -55,45 +51,46 @@ try:
 
 > To do A, I did B. Does this approach make sense?
 
-The first asks for a verdict. It puts someone in the position of refereeing
-technical content they may not hold at your depth, so the honest answer is *I'm
-not sure*, and you leave with nothing. The second asks about direction: whether
-this is a reasonable way to attack the problem, whether that route has worked
-before, whether there is a cheaper one, whether this is the right problem to be
-attacking at all. Those are questions about research taste, and research taste
-is the thing your advisor has more of than you do. It also happens to be the
-part that transfers across fields, where technical detail does not.
+The first asks for a verdict. It asks someone to judge technical details they may
+not know as well as you do, so the honest answer is *I'm not sure*, and you leave
+with nothing. The second asks about direction. Is this a reasonable way to attack
+the problem? Has this route worked before? Is there a cheaper one? Is this even
+the right problem to work on?
 
-Ask for that consistently and the well turns out to be deeper than it looked.
+Those are questions about research taste, and research taste is the thing your
+advisor has more of than you do. It also travels. Technical detail belongs to one
+problem; a sense of what is worth doing works everywhere.
 
-**Listen to the comments that sting.** Sometimes what comes back sounds harsh,
-and it is easy to hear it as criticism of work you have put months into. I would
-suggest reading it another way: those are usually the same comments a reviewer
-would write. Your advisor is a peer — often quite literally among the people who
-review work like yours — and they are giving you the review before submission
-instead of after it. That is a generous order to receive it in, and a cheap one.
-So answering those comments carefully isn't politeness. It is the same work you
-would have to do later anyway, done earlier and at a much lower cost.
+Ask for that often, and the well turns out to be deeper than it looked.
 
-**Remember what the degree is.** A PhD is, by definition, learning to conduct
-research on your own. Not learning a subject — you can do that from papers, and
-you will. The advisor's role is not to be a senior engineer on your project. It
-is to guide you into a position where you can carry a research problem by
-yourself: choose it, frame it, judge whether it is going anywhere, and know when
-to stop.
+**Listen to the comments that sting.** Sometimes the comment you get back sounds
+harsh. It is easy to hear it as an attack on work you have spent months on. I
+would read it another way. Those are usually the same comments a reviewer would
+write. Your advisor is a peer, and often one of the people who reviews work like
+yours. They are giving you the review before you submit instead of after. That is
+a much cheaper order to get it in.
 
-Measured against that, an advisor who doesn't share your technical depth is not
-a problem to be solved. It is close to what the arrangement was for.
+So answering those comments carefully is not politeness. It is the same work you
+would have to do later anyway, done earlier and for less.
+
+**Remember what the degree is.** A PhD is, by definition, learning to do research
+on your own. It is not learning a subject. You can do that from papers, and you
+will. Your advisor is not there to be a senior engineer on your project. They are
+there to bring you to the point where you can carry a research problem by
+yourself: pick it, frame it, judge whether it is going anywhere, and know when to
+stop.
+
+Against that, an advisor who does not share your technical depth is not a problem
+to solve. It is close to what the arrangement was for.
 
 ## What this makes possible
 
-None of this is an argument for expecting less from an advisor. It is an
-argument for asking for the right thing, and in my experience it makes for a
-much better relationship than the alternative. You stop arriving at meetings
-with a list of items to be checked and start arriving with a position: here is
-what I tried, here is why, here is where I think it goes, and here is where I
-would like to be told I am wrong about the direction.
+None of this means expecting less from your advisor. It means asking for the
+right thing. In my experience it makes for a much better relationship.
 
-Your advisor gets to do the thing they are genuinely good at. You get to own the
-work. And you come out the other end with what the degree was for, which was
-never a set of answers.
+You stop coming to meetings with a list of things to be checked. You start coming
+with a position: here is what I tried, here is why, here is where I think it
+goes, and here is where I want to be told I am wrong about the direction.
+
+Your advisor gets to do the thing they are good at. You get to own the work. And
+you leave with what the degree was for, which was never a set of answers.
