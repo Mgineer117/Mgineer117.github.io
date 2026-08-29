@@ -1174,7 +1174,11 @@
     var canvas = document.getElementById("hero-field");
     if (!canvas || !canvas.getContext) return;
 
-    var host = canvas.parentElement;                 /* the cover, not the canvas: */
+    /* Normally the cover, since the canvas sits behind the text and gets no
+       events of its own. A page whose field is fixed behind everything names
+       a wider host instead, so the pointer is tracked the whole way down. */
+    var hostSel = canvas.getAttribute("data-host");
+    var host = (hostSel && document.querySelector(hostSel)) || canvas.parentElement;
     var field = FIELDS[canvas.getAttribute("data-field")] || FIELDS.contract;
     var accent = canvas.getAttribute("data-accent");
     if (accent && /^\d{1,3},\d{1,3},\d{1,3}$/.test(accent)) ACCENT = accent;

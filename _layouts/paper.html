@@ -19,21 +19,23 @@ layout: default
 </style>
 {% endif %}
 
-<div class="paper-page">
+<div class="paper-page{% if page.collection == 'publications' %} paper-page--immersive{% endif %}">
 <div class="paper-progress" id="paper-progress" aria-hidden="true"><i></i></div>
 
 {% if page.collection == 'publications' %}
 
   {%- comment -%}
-    Split composition, used only here. Every other page on the site is a band
-    across the top with the content beneath it; a paper instead reads beside a
-    panel that does not scroll away.
+    The field is the page here: fixed behind everything, live the whole way
+    down, with the reading sheet floating over it. Every other page on the
+    site is a band with content beneath it, so this shape belongs to papers.
   {%- endcomment -%}
-  <main class="paper-split" role="main">
-    {% include paper-aside.html %}
+  <main class="paper-immersive" role="main">
+    {% include paper-opening.html %}
 
-    <article class="paper-read">
-      {% include paper-body.html %}
+    <div class="paper-flowline">
+      <article class="paper-sheet">
+        {% include paper-body.html %}
+      </article>
 
       {% assign siblings = site.publications | sort: "date" | reverse %}
       {% assign idx = -1 %}
@@ -41,52 +43,51 @@ layout: default
       {% assign prev_i = idx | minus: 1 %}
       {% assign next_i = idx | plus: 1 %}
 
-      <nav class="paper-nav" aria-label="Other publications">
-        {% if idx > 0 %}
-          {% assign prev = siblings[prev_i] %}
-          <a class="paper-nav__item paper-nav__item--prev" href="{{ base_path }}{{ prev.url }}">
-            <span class="paper-nav__dir">Newer</span>
-            <span class="paper-nav__title">{{ prev.title }}</span>
-          </a>
-        {% else %}<span></span>{% endif %}
+      <div class="paper-end">
+        <nav class="paper-nav" aria-label="Other publications">
+          {% if idx > 0 %}
+            {% assign prev = siblings[prev_i] %}
+            <a class="paper-nav__item paper-nav__item--prev" href="{{ base_path }}{{ prev.url }}">
+              <span class="paper-nav__dir">Newer</span>
+              <span class="paper-nav__title">{{ prev.title }}</span>
+            </a>
+          {% else %}<span></span>{% endif %}
 
-        {% if next_i < siblings.size %}
-          {% assign next = siblings[next_i] %}
-          <a class="paper-nav__item paper-nav__item--next" href="{{ base_path }}{{ next.url }}">
-            <span class="paper-nav__dir">Older</span>
-            <span class="paper-nav__title">{{ next.title }}</span>
-          </a>
-        {% endif %}
-      </nav>
-
-      {% assign shown = 0 %}
-      {% capture related_html %}
-        {% for p in siblings %}
-          {% if p.url != page.url and shown < 3 %}
-            {% assign shared = 0 %}
-            {% for t in page.tags %}{% if p.tags contains t %}{% assign shared = shared | plus: 1 %}{% endif %}{% endfor %}
-            {% if shared > 0 %}
-              {% assign shown = shown | plus: 1 %}
-              <a class="rel-card" href="{{ base_path }}{{ p.url }}">
-                <span class="rel-card__year">{{ p.date | date: "%Y" }}</span>
-                <span class="rel-card__title">{{ p.title }}</span>
-                <span class="rel-card__venue">{{ p.venue }}</span>
-              </a>
-            {% endif %}
+          {% if next_i < siblings.size %}
+            {% assign next = siblings[next_i] %}
+            <a class="paper-nav__item paper-nav__item--next" href="{{ base_path }}{{ next.url }}">
+              <span class="paper-nav__dir">Older</span>
+              <span class="paper-nav__title">{{ next.title }}</span>
+            </a>
           {% endif %}
-        {% endfor %}
-      {% endcapture %}
+        </nav>
 
-      {% if shown > 0 %}
-        <section class="paper-related paper-related--inline">
-          <div class="sec-head">
+        {% assign shown = 0 %}
+        {% capture related_html %}
+          {% for p in siblings %}
+            {% if p.url != page.url and shown < 3 %}
+              {% assign shared = 0 %}
+              {% for t in page.tags %}{% if p.tags contains t %}{% assign shared = shared | plus: 1 %}{% endif %}{% endfor %}
+              {% if shared > 0 %}
+                {% assign shown = shown | plus: 1 %}
+                <a class="rel-card" href="{{ base_path }}{{ p.url }}">
+                  <span class="rel-card__year">{{ p.date | date: "%Y" }}</span>
+                  <span class="rel-card__title">{{ p.title }}</span>
+                  <span class="rel-card__venue">{{ p.venue }}</span>
+                </a>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        {% endcapture %}
+
+        {% if shown > 0 %}
+          <section class="paper-related">
             <p class="eyebrow">Related</p>
-            <h2>Work along the same thread</h2>
-          </div>
-          <div class="rel-grid">{{ related_html }}</div>
-        </section>
-      {% endif %}
-    </article>
+            <div class="rel-grid">{{ related_html }}</div>
+          </section>
+        {% endif %}
+      </div>
+    </div>
   </main>
 
 {% else %}

@@ -1,0 +1,68 @@
+{% include base_path %}
+
+{%- comment -%}
+  Publications do not open with a band. The field is the page: it is fixed
+  behind everything and stays live the whole way down, and the first screen is
+  nothing but the paper's identity standing in it.
+{%- endcomment -%}
+
+{% assign field = page.field | default: 'lattice' %}
+{% case page.category %}
+  {% when 'journals' %}{% assign kind = 'Journal article' %}
+  {% when 'conferences' %}{% assign kind = 'Conference paper' %}
+  {% when 'preprints' %}{% assign kind = 'Preprint' %}
+  {% else %}{% assign kind = 'Publication' %}
+{% endcase %}
+
+<div class="paper-field-wrap" aria-hidden="true">
+  <canvas id="hero-field" class="paper-field" data-field="{{ field }}" data-host=".paper-page--immersive"{% if page.accent %} data-accent="{{ page.accent }}"{% endif %}></canvas>
+  <div class="paper-field__grid"></div>
+</div>
+
+<section class="paper-open">
+  <div class="paper-open__inner">
+    <a class="paper-back" href="{{ base_path }}/publications/">
+      <span aria-hidden="true">&larr;</span> Publications
+    </a>
+
+    <p class="eyebrow">{{ kind }}{% if page.date %} &middot; {{ page.date | date: "%Y" }}{% endif %}</p>
+
+    <h1 class="paper-title">{{ page.title }}</h1>
+
+    {% if page.authors %}
+      <p class="paper-authors">
+        {% for a in page.authors %}<span class="paper-author{% if a == 'Minjae Cho' %} is-me{% endif %}">{{ a }}</span>{% unless forloop.last %}<span class="paper-sep">·</span>{% endunless %}{% endfor %}
+      </p>
+    {% endif %}
+
+    <p class="paper-venue">
+      {% if page.venue %}{{ page.venue }}{% endif %}
+      {% if page.date %}<span class="paper-sep">·</span><time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %Y" }}</time>{% endif %}
+    </p>
+
+    {% if page.tags and page.tags.size > 0 %}
+      <ul class="paper-chips">
+        {% for t in page.tags %}<li class="chip">{{ t }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+
+    <div class="paper-actions">
+      {% if page.paperurl %}
+        {% assign is_url = page.paperurl | slice: 0, 4 %}
+        {% if is_url == 'http' %}<a class="btn-x" href="{{ page.paperurl | escape }}" rel="noopener">Read the paper</a>{% endif %}
+      {% endif %}
+      {% if page.publisherurl %}<a class="btn-x btn-x--ghost" href="{{ page.publisherurl | escape }}" rel="noopener">Publisher</a>{% endif %}
+      {% if page.codeurl %}<a class="btn-x btn-x--ghost" href="{{ page.codeurl | escape }}" rel="noopener">Code</a>{% endif %}
+      {% if page.bibtex %}<a class="btn-x btn-x--ghost" href="#cite">Cite</a>{% endif %}
+      <a class="btn-x btn-x--ghost" href="#comments">Discussion</a>
+    </div>
+  </div>
+
+  <a class="paper-cue" href="#paper-prose" aria-label="Skip to the paper">
+    <span></span>
+  </a>
+</section>
+
+<nav class="paper-toc paper-toc--margin" id="paper-toc" hidden aria-label="Contents">
+  <ol></ol>
+</nav>
