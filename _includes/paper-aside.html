@@ -1,0 +1,65 @@
+{% include base_path %}
+
+{%- comment -%}
+  Publications do not get the banner every other page uses. The identity lives
+  in a panel that stays put while the paper scrolls past it, so the title,
+  the authors and the way back are readable from anywhere in the text.
+{%- endcomment -%}
+
+{% assign field = page.field | default: 'lattice' %}
+{% case page.category %}
+  {% when 'journals' %}{% assign kind = 'Journal article' %}
+  {% when 'conferences' %}{% assign kind = 'Conference paper' %}
+  {% when 'preprints' %}{% assign kind = 'Preprint' %}
+  {% else %}{% assign kind = 'Publication' %}
+{% endcase %}
+
+<aside class="paper-aside">
+  <canvas id="hero-field" class="paper-aside__canvas" data-field="{{ field }}"{% if page.accent %} data-accent="{{ page.accent }}"{% endif %} aria-hidden="true"></canvas>
+  <div class="paper-aside__grid" aria-hidden="true"></div>
+
+  <div class="paper-aside__inner">
+    <a class="paper-back" href="{{ base_path }}/publications/">
+      <span aria-hidden="true">&larr;</span> Publications
+    </a>
+
+    <p class="eyebrow">{{ kind }}{% if page.date %} &middot; {{ page.date | date: "%Y" }}{% endif %}</p>
+
+    <h1 class="paper-title">{{ page.title }}</h1>
+
+    {% if page.authors %}
+      <p class="paper-authors">
+        {% for a in page.authors %}<span class="paper-author{% if a == 'Minjae Cho' %} is-me{% endif %}">{{ a }}</span>{% unless forloop.last %}<span class="paper-sep">·</span>{% endunless %}{% endfor %}
+      </p>
+    {% endif %}
+
+    <p class="paper-venue">
+      {% if page.venue %}{{ page.venue }}{% endif %}
+      {% if page.date %}<span class="paper-sep">·</span><time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %Y" }}</time>{% endif %}
+    </p>
+
+    {% if page.tags and page.tags.size > 0 %}
+      <ul class="paper-chips">
+        {% for t in page.tags %}<li class="chip">{{ t }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+
+    <div class="paper-actions">
+      {% if page.paperurl %}
+        {% assign is_url = page.paperurl | slice: 0, 4 %}
+        {% if is_url == 'http' %}
+          <a class="btn-x btn-x--sm" href="{{ page.paperurl | escape }}" rel="noopener">Read the paper</a>
+        {% endif %}
+      {% endif %}
+      {% if page.publisherurl %}<a class="btn-x btn-x--sm btn-x--ghost" href="{{ page.publisherurl | escape }}" rel="noopener">Publisher</a>{% endif %}
+      {% if page.codeurl %}<a class="btn-x btn-x--sm btn-x--ghost" href="{{ page.codeurl | escape }}" rel="noopener">Code</a>{% endif %}
+      {% if page.bibtex %}<a class="btn-x btn-x--sm btn-x--ghost" href="#cite">Cite</a>{% endif %}
+      <a class="btn-x btn-x--sm btn-x--ghost" href="#comments">Discussion</a>
+    </div>
+
+    <nav class="paper-toc paper-toc--aside" id="paper-toc" hidden>
+      <p class="paper-rail__head">Contents</p>
+      <ol></ol>
+    </nav>
+  </div>
+</aside>

@@ -1834,3 +1834,117 @@ html.reveal-on .reveal.is-in {
 .reel-stage--fig .reel-stage__play span { width: 44px; height: 44px; font-size: 13px; }
 .paper-figure--lead { margin: 0 0 2.2em; }
 .paper-figure--trio .reel-stage--fig .reel-stage__play span { width: 34px; height: 34px; font-size: 11px; }
+
+/* ==========================================================================
+   Publication pages — a split reading view
+   Every other page on this site is a full-width band with content beneath it.
+   A paper instead reads beside a panel that stays put, so the title, the
+   authors and the way back are legible from anywhere in the text.
+   ========================================================================== */
+
+.paper-split {
+  display: grid;
+  grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
+  align-items: start;
+  background: var(--paper);
+}
+
+.paper-aside {
+  position: sticky;
+  top: 70px;                                  /* the masthead is fixed at 70px */
+  height: calc(100vh - 70px);
+  height: calc(100svh - 70px);
+  overflow: hidden;
+  isolation: isolate;
+  color: #fff;
+  background: linear-gradient(165deg, #08131f 0%, var(--ink) 42%, var(--navy) 100%);
+}
+.paper-aside__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+.paper-aside__grid {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(120% 90% at 30% 20%, #000 35%, transparent 78%);
+  -webkit-mask-image: radial-gradient(120% 90% at 30% 20%, #000 35%, transparent 78%);
+}
+.paper-aside__inner {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(26px, 3.2vw, 42px) clamp(24px, 2.8vw, 38px) clamp(30px, 3.4vw, 44px);
+  display: flex;
+  flex-direction: column;
+}
+/* the panel scrolls its own overflow on short screens, quietly */
+.paper-aside__inner::-webkit-scrollbar { width: 6px; }
+.paper-aside__inner::-webkit-scrollbar-thumb { background: rgba(255,255,255,.16); border-radius: 3px; }
+
+.paper-aside .paper-title {
+  font-size: clamp(23px, 1.9vw, 31px);
+  max-width: none;
+  margin-top: 2px;
+}
+.paper-aside .paper-authors { margin-top: 16px; font-size: 14.5px; }
+.paper-aside .paper-venue { margin-top: 8px; font-size: 12px; }
+.paper-aside .paper-chips { margin-top: 18px; }
+.paper-aside .chip {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.2);
+  color: rgba(255,255,255,.9);
+}
+.paper-aside .paper-actions { margin-top: 22px; gap: 8px; }
+.paper-aside .btn-x { background: #fff; color: var(--navy) !important; border-color: #fff; }
+.paper-aside .btn-x--ghost {
+  background: transparent;
+  color: rgba(255,255,255,.9) !important;
+  border-color: rgba(255,255,255,.26);
+}
+.paper-aside .btn-x--ghost:hover { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.55); color: #fff !important; }
+
+.paper-toc--aside {
+  margin-top: auto;                            /* sits at the foot of the panel */
+  padding-top: 26px;
+}
+.paper-toc--aside .paper-rail__head { color: rgba(255,255,255,.42); }
+.paper-toc--aside ol { border-left-color: rgba(255,255,255,.16); margin-bottom: 0; }
+.paper-toc--aside a { color: rgba(255,255,255,.62); font-size: 13px; padding: 6px 0 6px 14px; }
+.paper-toc--aside a:hover { color: #fff; }
+.paper-toc--aside a.is-here { color: #fff; border-left-color: var(--accent); }
+
+.paper-read {
+  min-width: 0;
+  padding: clamp(38px, 4.5vw, 76px) clamp(24px, 4vw, 72px) clamp(56px, 7vw, 104px);
+  max-width: 860px;
+}
+.paper-read .paper-prose { max-width: none; }
+.paper-read .paper-nav { padding-bottom: 0; margin-top: clamp(40px, 5vw, 64px); }
+.paper-related--inline { margin-top: clamp(44px, 5.5vw, 72px); padding-top: clamp(30px, 4vw, 44px); border-top: 1px solid var(--line); }
+.paper-related--inline .sec-head { margin-bottom: 22px; }
+.paper-related--inline .sec-head h2 { font-size: clamp(19px, 2.2vw, 23px); }
+
+/* --- stacked, below the split ------------------------------------------- */
+
+@media (max-width: 1023px) {
+  .paper-split { grid-template-columns: minmax(0, 1fr); }
+  .paper-aside {
+    position: static;
+    height: auto;
+    min-height: 58vh;
+  }
+  .paper-aside__inner { height: auto; overflow: visible; padding-block: clamp(34px, 8vw, 56px); }
+  .paper-aside .paper-title { font-size: clamp(25px, 5.6vw, 38px); max-width: 20ch; }
+  .paper-toc--aside { margin-top: 30px; }
+  .paper-read { padding-inline: clamp(20px, 6vw, 44px); max-width: none; }
+}
+
+@media (max-width: 620px) {
+  .paper-aside { min-height: 0; }
+  .paper-toc--aside { display: none; }        /* the contents list is noise here */
+}

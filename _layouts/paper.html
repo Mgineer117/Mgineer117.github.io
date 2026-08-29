@@ -22,145 +22,105 @@ layout: default
 <div class="paper-page">
 <div class="paper-progress" id="paper-progress" aria-hidden="true"><i></i></div>
 
-{% include paper-hero.html %}
+{% if page.collection == 'publications' %}
 
-<main class="paper-main" role="main">
-  <div class="wrap paper-wrap">
+  {%- comment -%}
+    Split composition, used only here. Every other page on the site is a band
+    across the top with the content beneath it; a paper instead reads beside a
+    panel that does not scroll away.
+  {%- endcomment -%}
+  <main class="paper-split" role="main">
+    {% include paper-aside.html %}
 
-    <aside class="paper-rail" aria-label="On this page">
-      <nav class="paper-toc" id="paper-toc" hidden>
-        <p class="paper-rail__head">On this page</p>
-        <ol></ol>
+    <article class="paper-read">
+      {% include paper-body.html %}
+
+      {% assign siblings = site.publications | sort: "date" | reverse %}
+      {% assign idx = -1 %}
+      {% for p in siblings %}{% if p.url == page.url %}{% assign idx = forloop.index0 %}{% endif %}{% endfor %}
+      {% assign prev_i = idx | minus: 1 %}
+      {% assign next_i = idx | plus: 1 %}
+
+      <nav class="paper-nav" aria-label="Other publications">
+        {% if idx > 0 %}
+          {% assign prev = siblings[prev_i] %}
+          <a class="paper-nav__item paper-nav__item--prev" href="{{ base_path }}{{ prev.url }}">
+            <span class="paper-nav__dir">Newer</span>
+            <span class="paper-nav__title">{{ prev.title }}</span>
+          </a>
+        {% else %}<span></span>{% endif %}
+
+        {% if next_i < siblings.size %}
+          {% assign next = siblings[next_i] %}
+          <a class="paper-nav__item paper-nav__item--next" href="{{ base_path }}{{ next.url }}">
+            <span class="paper-nav__dir">Older</span>
+            <span class="paper-nav__title">{{ next.title }}</span>
+          </a>
+        {% endif %}
       </nav>
 
-      <div class="paper-facts">
-        <p class="paper-rail__head">At a glance</p>
-        <dl>
-          {% if page.venue %}<div><dt>Venue</dt><dd>{{ page.venue }}</dd></div>{% endif %}
-          {% if page.date %}<div><dt>Date</dt><dd>{{ page.date | date: "%B %Y" }}</dd></div>{% endif %}
-          {% if page.instructor %}<div><dt>Instructor</dt><dd>{{ page.instructor }}</dd></div>{% endif %}
-          {% if page.semester %}<div><dt>Term</dt><dd>{{ page.semester }}</dd></div>{% endif %}
-          {% if page.location %}<div><dt>Location</dt><dd>{{ page.location }}</dd></div>{% endif %}
-          {% if page.tags and page.tags.size > 0 %}
-            <div><dt>Topics</dt><dd>{{ page.tags | join: ", " }}</dd></div>
+      {% assign shown = 0 %}
+      {% capture related_html %}
+        {% for p in siblings %}
+          {% if p.url != page.url and shown < 3 %}
+            {% assign shared = 0 %}
+            {% for t in page.tags %}{% if p.tags contains t %}{% assign shared = shared | plus: 1 %}{% endif %}{% endfor %}
+            {% if shared > 0 %}
+              {% assign shown = shown | plus: 1 %}
+              <a class="rel-card" href="{{ base_path }}{{ p.url }}">
+                <span class="rel-card__year">{{ p.date | date: "%Y" }}</span>
+                <span class="rel-card__title">{{ p.title }}</span>
+                <span class="rel-card__venue">{{ p.venue }}</span>
+              </a>
+            {% endif %}
           {% endif %}
-        </dl>
-      </div>
-    </aside>
+        {% endfor %}
+      {% endcapture %}
 
-    <article class="paper-body">
-      {%- comment -%}
-        Publications open with their own Abstract block, so a lede here would
-        just restate it. Projects and teaching pages have no abstract, and the
-        excerpt is the only summary they carry.
-      {%- endcomment -%}
-      {% if page.excerpt and page.collection != 'publications' %}
-        <p class="paper-lede">{{ page.excerpt | markdownify | strip_html | strip_newlines }}</p>
-      {% endif %}
-
-      {%- comment -%}
-        Projects carry no figures in their body, so the teaser is the only
-        visual they have. Publications already illustrate themselves.
-      {%- endcomment -%}
-      {% if page.collection == 'projects' and page.teaser %}
-        {% assign ext = page.teaser | slice: -4, 4 %}
-        <div class="paper-figure paper-figure--lead">
-          {% if ext == '.gif' %}
-            {% assign poster = page.teaser | replace: '.gif', '-poster.jpg' %}
-            <button type="button" class="reel-stage reel-stage--fig" aria-pressed="false"
-                    aria-label="Play the {{ page.title | escape }} clip"
-                    data-clip="{{ base_path }}{{ page.teaser }}">
-              <img src="{{ base_path }}{{ poster }}" alt="{{ page.title | escape }}" loading="lazy" decoding="async">
-              <span class="reel-stage__play"><span>&#9654;</span></span>
-            </button>
-          {% else %}
-            <img src="{{ base_path }}{{ page.teaser }}" alt="{{ page.title | escape }}" loading="lazy" decoding="async">
-          {% endif %}
-        </div>
-      {% endif %}
-
-      <div class="paper-prose" id="paper-prose">
-        {{ content }}
-      </div>
-
-      {% if page.bibtex %}
-        <section class="paper-cite" id="cite">
-          <div class="paper-cite__head">
-            <h2>Cite this work</h2>
-            <button type="button" class="btn-x btn-x--sm btn-x--ghost" data-copy="#paper-bibtex">Copy BibTeX</button>
-          </div>
-          {% if page.citation %}
-            <p class="paper-cite__plain">{{ page.citation }}</p>
-          {% endif %}
-          <pre class="paper-bibtex" id="paper-bibtex"><code>{{ page.bibtex | strip | escape }}</code></pre>
-        </section>
-      {% endif %}
-
-      {% assign show_comments = false %}
-      {% if site.firebase.apiKey and site.firebase.apiKey != "" %}
-        {% if page.collection == 'publications' or page.comments_box %}{% assign show_comments = true %}{% endif %}
-      {% endif %}
-      {% if show_comments %}{% include comments-box.html %}{% endif %}
-    </article>
-  </div>
-
-  {% if page.collection == 'publications' %}
-    {% assign siblings = site.publications | sort: "date" | reverse %}
-
-    {%- comment -%} Neighbours in the same reading order the index uses. {%- endcomment -%}
-    {% assign idx = -1 %}
-    {% for p in siblings %}{% if p.url == page.url %}{% assign idx = forloop.index0 %}{% endif %}{% endfor %}
-    {% assign prev_i = idx | minus: 1 %}
-    {% assign next_i = idx | plus: 1 %}
-
-    <nav class="paper-nav wrap" aria-label="Other publications">
-      {% if idx > 0 %}
-        {% assign prev = siblings[prev_i] %}
-        <a class="paper-nav__item paper-nav__item--prev" href="{{ base_path }}{{ prev.url }}">
-          <span class="paper-nav__dir">Newer</span>
-          <span class="paper-nav__title">{{ prev.title }}</span>
-        </a>
-      {% else %}<span></span>{% endif %}
-
-      {% if next_i < siblings.size %}
-        {% assign next = siblings[next_i] %}
-        <a class="paper-nav__item paper-nav__item--next" href="{{ base_path }}{{ next.url }}">
-          <span class="paper-nav__dir">Older</span>
-          <span class="paper-nav__title">{{ next.title }}</span>
-        </a>
-      {% endif %}
-    </nav>
-
-    {%- comment -%} Anything sharing a topic, newest first, capped at three. {%- endcomment -%}
-    {% assign shown = 0 %}
-    {% capture related_html %}
-      {% for p in siblings %}
-        {% if p.url != page.url and shown < 3 %}
-          {% assign shared = 0 %}
-          {% for t in page.tags %}{% if p.tags contains t %}{% assign shared = shared | plus: 1 %}{% endif %}{% endfor %}
-          {% if shared > 0 %}
-            {% assign shown = shown | plus: 1 %}
-            <a class="rel-card" href="{{ base_path }}{{ p.url }}">
-              <span class="rel-card__year">{{ p.date | date: "%Y" }}</span>
-              <span class="rel-card__title">{{ p.title }}</span>
-              <span class="rel-card__venue">{{ p.venue }}</span>
-            </a>
-          {% endif %}
-        {% endif %}
-      {% endfor %}
-    {% endcapture %}
-
-    {% if shown > 0 %}
-      <section class="sec sec--tint paper-related">
-        <div class="wrap">
+      {% if shown > 0 %}
+        <section class="paper-related paper-related--inline">
           <div class="sec-head">
             <p class="eyebrow">Related</p>
             <h2>Work along the same thread</h2>
           </div>
           <div class="rel-grid">{{ related_html }}</div>
+        </section>
+      {% endif %}
+    </article>
+  </main>
+
+{% else %}
+
+  {% include paper-hero.html %}
+
+  <main class="paper-main" role="main">
+    <div class="wrap paper-wrap">
+      <aside class="paper-rail" aria-label="On this page">
+        <nav class="paper-toc" id="paper-toc" hidden>
+          <p class="paper-rail__head">On this page</p>
+          <ol></ol>
+        </nav>
+
+        <div class="paper-facts">
+          <p class="paper-rail__head">At a glance</p>
+          <dl>
+            {% if page.venue %}<div><dt>Venue</dt><dd>{{ page.venue }}</dd></div>{% endif %}
+            {% if page.date %}<div><dt>Date</dt><dd>{{ page.date | date: "%B %Y" }}</dd></div>{% endif %}
+            {% if page.instructor %}<div><dt>Instructor</dt><dd>{{ page.instructor }}</dd></div>{% endif %}
+            {% if page.semester %}<div><dt>Term</dt><dd>{{ page.semester }}</dd></div>{% endif %}
+            {% if page.location %}<div><dt>Location</dt><dd>{{ page.location }}</dd></div>{% endif %}
+            {% if page.tags and page.tags.size > 0 %}
+              <div><dt>Topics</dt><dd>{{ page.tags | join: ", " }}</dd></div>
+            {% endif %}
+          </dl>
         </div>
-      </section>
-    {% endif %}
-  {% endif %}
-</main>
+      </aside>
+
+      <article class="paper-body">
+        {% include paper-body.html %}
+      </article>
+    </div>
+  </main>
+
+{% endif %}
 </div>

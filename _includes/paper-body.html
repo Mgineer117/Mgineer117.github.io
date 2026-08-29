@@ -1,0 +1,46 @@
+{%- comment -%}
+  Shared by both compositions: publications read beside a fixed panel,
+  everything else reads under a banner.
+{%- endcomment -%}
+
+{% if page.excerpt and page.collection != 'publications' %}
+  <p class="paper-lede">{{ page.excerpt | markdownify | strip_html | strip_newlines }}</p>
+{% endif %}
+
+{% if page.collection == 'projects' and page.teaser %}
+  {% assign ext = page.teaser | slice: -4, 4 %}
+  <div class="paper-figure paper-figure--lead">
+    {% if ext == '.gif' %}
+      {% assign poster = page.teaser | replace: '.gif', '-poster.jpg' %}
+      <button type="button" class="reel-stage reel-stage--fig" aria-pressed="false"
+              aria-label="Play the {{ page.title | escape }} clip"
+              data-clip="{{ base_path }}{{ page.teaser }}">
+        <img src="{{ base_path }}{{ poster }}" alt="{{ page.title | escape }}" loading="lazy" decoding="async">
+        <span class="reel-stage__play"><span>&#9654;</span></span>
+      </button>
+    {% else %}
+      <img src="{{ base_path }}{{ page.teaser }}" alt="{{ page.title | escape }}" loading="lazy" decoding="async">
+    {% endif %}
+  </div>
+{% endif %}
+
+<div class="paper-prose" id="paper-prose">
+  {{ content }}
+</div>
+
+{% if page.bibtex %}
+  <section class="paper-cite" id="cite">
+    <div class="paper-cite__head">
+      <h2>Cite this work</h2>
+      <button type="button" class="btn-x btn-x--sm btn-x--ghost" data-copy="#paper-bibtex">Copy BibTeX</button>
+    </div>
+    {% if page.citation %}<p class="paper-cite__plain">{{ page.citation }}</p>{% endif %}
+    <pre class="paper-bibtex" id="paper-bibtex"><code>{{ page.bibtex | strip | escape }}</code></pre>
+  </section>
+{% endif %}
+
+{% assign show_comments = false %}
+{% if site.firebase.apiKey and site.firebase.apiKey != "" %}
+  {% if page.collection == 'publications' or page.comments_box %}{% assign show_comments = true %}{% endif %}
+{% endif %}
+{% if show_comments %}{% include comments-box.html %}{% endif %}
