@@ -4,6 +4,7 @@ permalink: /year-archive/
 title: "Blog"
 hero:
   field: trace
+  kind: posts
   eyebrow: "Notes & writing"
   lede: "Occasional writing on research, control, and academic life."
 redirect_from:
@@ -31,16 +32,74 @@ redirect_from:
 
   {% else %}
 
-    {% assign by_year = site.posts | group_by_exp: "item", "item.date | date: '%Y'" %}
-    {% for group in by_year %}
-      <h3 class="group-head reveal">
-        <span>{{ group.name }}</span>
-        <em>{{ group.items | size }}</em>
-      </h3>
-      <div class="reveal">
-        {% for post in group.items %}{% include archive-single.html %}{% endfor %}
+    {%- comment -%}
+      The newest post gets the whole width; everything behind it becomes a
+      row in a year list. With a single post that reads as one deliberate
+      card rather than a list of one, which is the case that has to look
+      right first.
+    {%- endcomment -%}
+    {% assign lead = site.posts.first %}
+
+    <a class="blog-lead reveal" href="{{ base_path }}{{ lead.url }}">
+      <div class="blog-lead__rail">
+        <span class="blog-lead__day">{{ lead.date | date: "%d" }}</span>
+        <span class="blog-lead__mon">{{ lead.date | date: "%b %Y" }}</span>
+        {% assign post = lead %}
+        {% if lead.read_time %}
+          {% capture rt %}{% include read-time.html %}{% endcapture %}
+          <span class="blog-lead__read">{{ rt | strip | replace: " minute read", " min" | replace: "less than 1 min", "&lt; 1 min" }}</span>
+        {% endif %}
       </div>
-    {% endfor %}
+
+      <div class="blog-lead__body">
+        <p class="eyebrow">Latest</p>
+        <h2 class="blog-lead__title">{{ lead.title | markdownify | remove: "<p>" | remove: "</p>" }}</h2>
+        {% if lead.excerpt %}
+          <div class="blog-lead__lede">{{ lead.excerpt | markdownify | remove: "<p>" | remove: "</p>" }}</div>
+        {% endif %}
+        <div class="blog-lead__foot">
+          {% if lead.tags and lead.tags.size > 0 %}
+            <span class="blog-lead__tags">{% for t in lead.tags %}<span>{{ t }}</span>{% endfor %}</span>
+          {% endif %}
+          <span class="blog-lead__go">Read the post
+            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none"
+                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h13"/><path d="m12.5 5.5 6.5 6.5-6.5 6.5"/>
+            </svg>
+          </span>
+        </div>
+      </div>
+    </a>
+
+    {% assign rest = site.posts | shift %}
+    {% if rest.size > 0 %}
+      {% assign by_year = rest | group_by_exp: "item", "item.date | date: '%Y'" %}
+      {% for group in by_year %}
+        <h3 class="group-head reveal">
+          <span>{{ group.name }}</span>
+          <em>{{ group.items | size }}</em>
+        </h3>
+        <ol class="blog-list reveal">
+          {% for item in group.items %}
+            <li>
+              <a class="blog-row" href="{{ base_path }}{{ item.url }}">
+                <time class="blog-row__when" datetime="{{ item.date | date_to_xmlschema }}">{{ item.date | date: "%d %b" }}</time>
+                <span class="blog-row__title">{{ item.title | markdownify | remove: "<p>" | remove: "</p>" }}</span>
+                {% assign post = item %}
+                {% if item.read_time %}
+                  {% capture rt %}{% include read-time.html %}{% endcapture %}
+                  <span class="blog-row__read">{{ rt | strip | replace: " minute read", " min" | replace: "less than 1 min", "&lt; 1 min" }}</span>
+                {% endif %}
+                <svg class="blog-row__arrow" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"
+                     fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h13"/><path d="m12.5 5.5 6.5 6.5-6.5 6.5"/>
+                </svg>
+              </a>
+            </li>
+          {% endfor %}
+        </ol>
+      {% endfor %}
+    {% endif %}
 
   {% endif %}
 

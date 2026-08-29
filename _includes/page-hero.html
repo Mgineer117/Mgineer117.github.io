@@ -30,6 +30,14 @@
           <div class="hero__stat"><b>{{ years | first | date: "%Y" }}&ndash;{{ years | last | date: "%Y" }}</b><span>Span</span></div>
         </div>
 
+      {% when 'posts' %}
+        {% assign all_tags = site.posts | map: "tags" | join: "," | split: "," | uniq %}
+        <div class="hero__meta">
+          <div class="hero__stat"><b>{{ site.posts | size }}</b><span>{% if site.posts.size == 1 %}Post{% else %}Posts{% endif %}</span></div>
+          <div class="hero__stat"><b>{{ site.posts.first.date | date: "%b %Y" }}</b><span>Latest</span></div>
+          <div class="hero__stat"><b>{{ all_tags | size }}</b><span>Topics</span></div>
+        </div>
+
       {% when 'teaching' %}
         {% assign t_years = site.teaching | map: "date" | sort %}
         {% assign distinct = site.teaching | map: "title" | uniq | size %}
