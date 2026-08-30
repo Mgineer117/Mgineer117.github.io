@@ -47,7 +47,7 @@ redirect_from:
         {% assign post = lead %}
         {% if lead.read_time %}
           {% capture rt %}{% include read-time.html %}{% endcapture %}
-          <span class="blog-lead__read">{{ rt | strip | replace: " minute read", " min" | replace: "less than 1 min", "&lt; 1 min" }}</span>
+          <span class="blog-lead__read">{{ rt | strip | replace: " minute read", " min read" | replace: "less than 1 min read", "&lt; 1 min read" }}</span>
         {% endif %}
       </div>
 
@@ -88,7 +88,7 @@ redirect_from:
                 {% assign post = item %}
                 {% if item.read_time %}
                   {% capture rt %}{% include read-time.html %}{% endcapture %}
-                  <span class="blog-row__read">{{ rt | strip | replace: " minute read", " min" | replace: "less than 1 min", "&lt; 1 min" }}</span>
+                  <span class="blog-row__read">{{ rt | strip | replace: " minute read", " min read" | replace: "less than 1 min read", "&lt; 1 min read" }}</span>
                 {% endif %}
                 <svg class="blog-row__arrow" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"
                      fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">

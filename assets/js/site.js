@@ -1569,7 +1569,54 @@
     });
   }
 
+  /* ------------------------------------------------------------------ */
+  /* Theme toggle                                                        */
+  /*                                                                     */
+  /* Three states, not two: with nothing stored the page follows the      */
+  /* system, and only a click pins data-theme. Pinning the value the      */
+  /* system already shows is still a pin -- that is what lets someone     */
+  /* keep this site light on a dark machine.                              */
+  /* ------------------------------------------------------------------ */
+  function theme() {
+    var btn = document.getElementById("theme-toggle");
+    if (!btn) return;
+
+    var root = document.documentElement;
+    var media = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+    var meta = document.querySelector('meta[name="theme-color"]');
+
+    function current() {
+      return root.getAttribute("data-theme") ||
+             (media && media.matches ? "dark" : "light");
+    }
+
+    function paint() {
+      var dark = current() === "dark";
+      var label = dark ? "Switch to light theme" : "Switch to dark theme";
+      btn.setAttribute("aria-label", label);
+      btn.title = label;
+      if (meta) meta.setAttribute("content", dark ? "#0c1523" : "#ffffff");
+    }
+
+    btn.addEventListener("click", function () {
+      var next = current() === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("theme", next); } catch (e) {}
+      paint();
+    });
+
+    /* Following the system means following it as it changes. */
+    if (media && media.addEventListener) {
+      media.addEventListener("change", function () {
+        if (!root.getAttribute("data-theme")) paint();
+      });
+    }
+
+    paint();
+  }
+
   function init() {
+    theme();
     heroField();
     reel();
     filters();
