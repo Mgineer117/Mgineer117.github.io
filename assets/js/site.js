@@ -1183,6 +1183,7 @@
     var accent = canvas.getAttribute("data-accent");
     if (accent && /^\d{1,3},\d{1,3},\d{1,3}$/.test(accent)) ACCENT = accent;
     var ctx = canvas.getContext("2d");               /* the canvas sits behind the */
+    if (!ctx) return;             /* a fingerprint blocker can refuse one */
     var W = 0, H = 0, dpr = 1, t = 0;                /* text and gets no events    */
     var raf = null, visible = true, state = null;
 
@@ -1238,6 +1239,10 @@
       ptr.active += ((ptr.inside ? 1 : 0) - ptr.active) * (1 - Math.exp(-4 * dt));
       field.step(state, dt, t, W, H, ptr);
       paint(dt);
+      /* Reduced motion means nothing moves on its own -- not that the field
+         stops answering. Once the pointer has left and the field has relaxed
+         back, park it on a still frame until someone asks again. */
+      if (reduceMotion && !ptr.inside && ptr.active < 0.02 && !ptr.rings.length) stop();
     }
 
     function start() {
@@ -1259,8 +1264,8 @@
     function bindPointer() {
       if (!host) return;
 
-      host.addEventListener("pointermove", track, { passive: true });
-      host.addEventListener("pointerleave", function () { ptr.inside = false; }, { passive: true });
+      host.addEventListener("pointermove", function (e) { track(e); start(); }, { passive: true });
+      host.addEventListener("pointerleave", function () { ptr.inside = false; start(); }, { passive: true });
 
       host.addEventListener("pointerdown", function (e) {
         /* never steal a tap meant for a link, a button or a form control */
@@ -1271,22 +1276,16 @@
         ptr.rings.push({ x: ptr.x, y: ptr.y, age: 0 });
         if (ptr.rings.length > 5) ptr.rings.shift();
         if (field.pulse) field.pulse(state, ptr.x, ptr.y, W, H);
+        start();
       }, { passive: true });
 
       /* touch never fires pointerleave, so let the halo fade after a tap */
-      function release(e) { if (e.pointerType !== "mouse") ptr.inside = false; }
+      function release(e) { if (e.pointerType !== "mouse") ptr.inside = false; start(); }
       host.addEventListener("pointerup", release, { passive: true });
       host.addEventListener("pointercancel", release, { passive: true });
     }
 
     function begin() {
-      if (reduceMotion) {
-        var n = field.settle || 200;
-        for (var i = 0; i < n; i++) { t += 0.03; field.step(state, 0.03, t, W, H, ptr); }
-        paint(0);
-        return;                       /* no interaction when motion is unwelcome */
-      }
-
       var rt;
       window.addEventListener("resize", function () {
         clearTimeout(rt);
@@ -1305,6 +1304,15 @@
       }
 
       bindPointer();
+
+      if (reduceMotion) {
+        /* Pre-run the field to where it would have settled, and show that.
+           The loop starts only when the pointer engages, from bindPointer. */
+        var n = field.settle || 200;
+        for (var i = 0; i < n; i++) { t += 0.03; field.step(state, 0.03, t, W, H, ptr); }
+        paint(0);
+        return;
+      }
       start();
     }
 
@@ -1616,14 +1624,15 @@
   }
 
   function init() {
-    theme();
-    heroField();
-    reel();
-    filters();
-    news();
-    paper();
-    copiers();
-    reveal();
+    /* Run each piece behind its own guard. These are independent features,
+       and a throw in one used to silently kill every one after it -- a
+       refused 2d context took the filters, the clip players and the copy
+       buttons down with it. */
+    [theme, heroField, reel, filters, news, paper, copiers, reveal]
+      .forEach(function (fn) {
+        try { fn(); }
+        catch (err) { if (window.console) console.error(fn.name || "init", err); }
+      });
   }
 
   if (document.readyState === "loading") {
