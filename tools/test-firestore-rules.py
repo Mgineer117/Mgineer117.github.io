@@ -222,6 +222,10 @@ def main():
                {"writes": [{"delete": VIEW_DOC(pid)}]})[0], False)
     check("none of that moved the number", view_count(pid) == at)
 
+    # The daily bucket is an ordinary counter under a dated id, so the same
+    # rules have to accept that shape.
+    check("a dated bucket id is accepted", bump("_day-2000-01-01", path="2000-01-01"))
+
     # The id is part of the shape: the collection is for page slugs, not for
     # whatever a stranger would like to store in it.
     check("an id with capitals is refused", bump("BadId"), False)

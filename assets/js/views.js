@@ -37,6 +37,25 @@
   var pageId = idFor(cfg.page || location.pathname);
   var pagePath = cfg.page || location.pathname;
 
+  /* "Today" is the site owner's today, not the reader's: a visitor in Tokyo
+     and a visitor in Chicago have to land in the same bucket or the daily
+     number means nothing. Intl does the whole job, DST included. If the
+     browser cannot resolve the zone it falls back to UTC, which is wrong by
+     a few hours rather than wrong by a day. */
+  function chicagoDate() {
+    try {
+      return new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Chicago",
+        year: "numeric", month: "2-digit", day: "2-digit"
+      }).format(new Date());
+    } catch (e) {
+      return new Date().toISOString().slice(0, 10);
+    }
+  }
+
+  var today = chicagoDate();
+  var dayId = "_day-" + today;
+
   /* A visit is a session, not a page load: reading five pages is one visit to
      the site, and re-reading one page is not a second view of it. */
   function fresh(key) {
@@ -65,30 +84,67 @@
     }).then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); });
   }
 
-  function show(which, n) {
-    var nodes = document.querySelectorAll('[data-views="' + which + '"]');
+  /* Which documents this page needs, and where each one's number goes.
+     A listing asks for a counter per row through data-views-path, so the
+     ids come from the same idFor() the writes use and the two can't drift. */
+  var targets = {};
+
+  function want(id, node) {
+    if (!id || !node) return;
+    (targets[id] = targets[id] || []).push(node);
+  }
+
+  function each(sel, fn) {
+    var n = document.querySelectorAll(sel);
+    for (var i = 0; i < n.length; i++) fn(n[i]);
+  }
+
+  each('[data-views="site"]',  function (n) { want("_site", n); });
+  each('[data-views="today"]', function (n) { want(dayId, n); });
+  each('[data-views="page"]',  function (n) { want(pageId, n); });
+  each("[data-views-path]", function (el) {
+    want(idFor(el.getAttribute("data-views-path")),
+         el.querySelector("[data-views]") || el);
+  });
+
+  function show(id, n) {
+    var nodes = targets[id] || [];
     for (var i = 0; i < nodes.length; i++) {
       nodes[i].textContent = n.toLocaleString();
       var box = nodes[i].closest("[data-views-box]") || nodes[i];
+      /* "1 views" reads as a bug even when the number is right. */
+      var unit = box.querySelector("[data-views-unit]");
+      if (unit) {
+        unit.textContent = unit.getAttribute("data-views-unit") + (n === 1 ? "" : "s");
+      }
       box.hidden = false;
     }
   }
 
   function read() {
-    return post(":batchGet", {
-      documents: [ROOT + "/views/_site", ROOT + "/views/" + pageId]
-    }).then(function (rows) {
+    var names = [];
+    for (var id in targets) names.push(ROOT + "/views/" + id);
+    if (!names.length) return Promise.resolve();
+
+    return post(":batchGet", { documents: names }).then(function (rows) {
+      /* A document that does not exist yet is a real zero. Only a failed
+         request leaves a counter hidden, so "0 views" and "offline" never
+         look the same. */
       for (var i = 0; i < rows.length; i++) {
-        var d = rows[i].found;
-        if (!d) continue;
-        var n = parseInt((d.fields && d.fields.count && d.fields.count.integerValue) || "0", 10);
-        show(d.name.slice(d.name.lastIndexOf("/") + 1) === "_site" ? "site" : "page", n);
+        var name = rows[i].found ? rows[i].found.name : rows[i].missing;
+        if (!name) continue;
+        var f = rows[i].found && rows[i].found.fields;
+        show(name.slice(name.lastIndexOf("/") + 1),
+             parseInt((f && f.count && f.count.integerValue) || "0", 10));
       }
     });
   }
 
   var writes = [];
   if (fresh("views:_site")) writes.push(bump("_site", "/"));
+  /* Keyed by the date, so a session that runs past Chicago midnight is
+     counted on both days rather than vanishing from the second one. */
+  if (fresh("views:" + dayId)) writes.push(bump(dayId, today));
   if (fresh("views:" + pageId)) writes.push(bump(pageId, pagePath.slice(0, 200)));
 
   /* Read after the write so a visitor sees a total that includes themselves;

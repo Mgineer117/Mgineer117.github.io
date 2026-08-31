@@ -49,6 +49,8 @@ redirect_from:
           {% capture rt %}{% include read-time.html %}{% endcapture %}
           <span class="blog-lead__read">{{ rt | strip | replace: " minute read", " min read" | replace: "less than 1 min read", "&lt; 1 min read" }}</span>
         {% endif %}
+        <span class="blog-lead__read blog-lead__views" data-views-box hidden
+              data-views-path="{{ lead.url }}"><b data-views></b> <i data-views-unit="view">views</i></span>
       </div>
 
       <div class="blog-lead__body">
@@ -90,6 +92,8 @@ redirect_from:
                   {% capture rt %}{% include read-time.html %}{% endcapture %}
                   <span class="blog-row__read">{{ rt | strip | replace: " minute read", " min read" | replace: "less than 1 min read", "&lt; 1 min read" }}</span>
                 {% endif %}
+                <span class="blog-row__read blog-row__views" data-views-box hidden
+                      data-views-path="{{ item.url }}"><b data-views></b> <i data-views-unit="view">views</i></span>
                 <svg class="blog-row__arrow" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"
                      fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M5 12h13"/><path d="m12.5 5.5 6.5 6.5-6.5 6.5"/>
