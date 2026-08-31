@@ -1,0 +1,7 @@
+{%- comment -%}
+  A list of names as prose: "A", "A and B", "A, B and C".
+  Caller passes list=<array>.
+{%- endcomment -%}
+{%- for a in include.list -%}
+{{ a }}{% if forloop.rindex == 2 %} and {% elsif forloop.rindex > 2 %}, {% endif %}
+{%- endfor -%}

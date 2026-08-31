@@ -883,7 +883,7 @@
         var cols = Math.ceil(W / sp) + 1, rows = Math.ceil(H / sp) + 1;
         var cells = new Float32Array(cols * rows);        /* 0 = unvisited, else age */
         return { cells: cells, cols: cols, rows: rows, sp: sp,
-                 front: [], next: [], acc: 0, tick: 0.13, sow: 0 };
+                 front: [], next: [], acc: 0, tick: 0.11, sow: 0 };
       },
       sowAt: function (st, x, y) {
         var c = Math.round(x / st.sp), r = Math.round(y / st.sp);
@@ -894,8 +894,19 @@
         st.front.push(i);
       },
       step: function (st, dt, t, W, H, ptr) {
+        /* A cell ages, and once it has faded past seeing it is unvisited
+           again, so the wave can pass back over it later. That is what keeps
+           this going without a reset: the old version wiped every cell the
+           moment the sheet was 90% explored, which blanked the whole canvas
+           in a single frame -- the largest pop on the page, and the reason
+           the cover kept emptying out. Nothing is ever cleared now; the
+           sheet recycles behind the wave. */
         var cells = st.cells;
-        for (var i = 0; i < cells.length; i++) if (cells[i] > 0) cells[i] += dt;
+        for (var i = 0; i < cells.length; i++) {
+          if (cells[i] <= 0) continue;
+          cells[i] += dt;
+          if (cells[i] > 3.6) cells[i] = 0;
+        }
 
         st.sow += dt;
         if (st.sow > 1.1) {
@@ -930,49 +941,63 @@
           st.next = front;
         }
 
-        /* once the sheet is mostly explored, start again */
-        var seen = 0;
-        for (i = 0; i < cells.length; i += 7) if (cells[i] > 0) seen++;
-        if (seen > (cells.length / 7) * 0.9) {
-          for (i = 0; i < cells.length; i++) cells[i] = 0;
-          st.front.length = 0;
-        }
       },
       pulse: function (st, x, y) { this.sowAt(st, x, y); },
+      /* A cell is brightest the instant the wave reaches it and thins from
+         there, so the propagation leaves rather than stops. What made it
+         read as flicker was the arithmetic: opacity was quantised into five
+         steps and cut off at 5%, and the frontier was a separate flat pass
+         over the trail, so a cell lost most of its opacity in one frame the
+         moment it stopped being the frontier. There is one exponential ramp
+         now, sampled finely enough to look continuous, and the frontier is
+         simply the youngest end of it -- no second pass, and no step to
+         fall off. Fills stay batched, one path per band, so a sheet of
+         ~1800 cells costs a few dozen calls rather than 1800. */
       draw: function (ctx, st) {
         var sp = st.sp, cells = st.cells, half = sp * 0.34, side = half * 2;
 
-        /* A visited sheet is ~1800 cells. One fillRect each is far too many
-           calls a frame, so alpha is quantised into a few buckets and each
-           bucket is a single path and a single fill. */
-        var B = 5, bucket = [], i;
-        for (i = 0; i < B; i++) bucket.push([]);
+        var A = 14,          /* opacity bands: fine enough to read smooth  */
+            C = 4,           /* colour steps, frontier tint to trail tint  */
+            PEAK = 0.26,     /* opacity of a cell the moment it is reached */
+            DECAY = 0.95,    /* per second; ~3.5s before it is invisible   */
+            WARM = 0.9;      /* seconds a cell keeps some frontier colour  */
+
+        var bins = st.bins, i, q, k;
+        if (!bins || bins.length !== A * C) {
+          bins = st.bins = [];
+          for (q = 0; q < A * C; q++) bins.push([]);
+        }
+        for (q = 0; q < bins.length; q++) bins[q].length = 0;
+
         for (i = 0; i < cells.length; i++) {
           var a = cells[i];
           if (!a) continue;
-          var fade = 1 - a * 0.6;
-          if (fade < 0.05) continue;
-          var b = Math.min(B - 1, (fade * B) | 0);
-          bucket[b].push(i);
+          var v = Math.exp(-a * DECAY);
+          if (v * PEAK < 0.012) continue;      /* below this nothing shows */
+          var warmth = a < WARM ? 1 - a / WARM : 0;
+          bins[Math.min(C - 1, (warmth * C) | 0) * A +
+               Math.min(A - 1, (v * A) | 0)].push(i);
         }
-        for (b = 0; b < B; b++) {
-          var list = bucket[b];
-          if (!list.length) continue;
-          ctx.beginPath();
-          for (var k = 0; k < list.length; k++) {
-            var idx = list[k], c = idx % st.cols, r = (idx - c) / st.cols;
-            ctx.rect(c * sp - half, r * sp - half, side, side);
+
+        var ac = ACCENT.split(","), bl = BLUE.split(",");
+        for (var cb = 0; cb < C; cb++) {
+          var m = (cb + 0.5) / C;
+          var col = Math.round(+bl[0] + (+ac[0] - +bl[0]) * m) + "," +
+                    Math.round(+bl[1] + (+ac[1] - +bl[1]) * m) + "," +
+                    Math.round(+bl[2] + (+ac[2] - +bl[2]) * m);
+          for (var ab = 0; ab < A; ab++) {
+            var list = bins[cb * A + ab];
+            if (!list.length) continue;
+            ctx.beginPath();
+            for (k = 0; k < list.length; k++) {
+              var idx = list[k], c = idx % st.cols, r = (idx - c) / st.cols;
+              ctx.rect(c * sp - half, r * sp - half, side, side);
+            }
+            ctx.fillStyle = "rgba(" + col + "," +
+              (PEAK * (ab + 0.5) / A).toFixed(3) + ")";
+            ctx.fill();
           }
-          ctx.fillStyle = "rgba(" + BLUE + "," + (((b + 0.5) / B) * 0.16).toFixed(3) + ")";
-          ctx.fill();
         }
-        ctx.beginPath();
-        for (var f = 0; f < st.front.length; f++) {
-          var fi = st.front[f], fc = fi % st.cols, fr = (fi - fc) / st.cols;
-          ctx.rect(fc * sp - half, fr * sp - half, side, side);
-        }
-        ctx.fillStyle = "rgba(" + ACCENT + ",0.40)";
-        ctx.fill();
       }
     },
 

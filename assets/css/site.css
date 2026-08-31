@@ -1749,6 +1749,18 @@ html.reveal-on .reveal.is-in {
   text-transform: uppercase;
   color: var(--steel-2);
 }
+/* Sits directly under the venue, in the same mono voice but quieter, so the
+   two read as one block of provenance rather than two claims. */
+.spot__advisor {
+  margin: 5px 0 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--steel-2);
+  opacity: .82;
+}
+
 .spot__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
 
 @media (max-width: 860px) {

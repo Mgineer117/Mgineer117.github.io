@@ -40,6 +40,9 @@ hero:
         <h3 class="spot__title"><a href="{{ base_path }}{{ post.url }}">{{ post.title }}</a></h3>
         <p class="spot__excerpt">{{ post.excerpt | strip_html }}</p>
         <p class="spot__venue">{{ post.venue }}</p>
+        {% if post.advisors and post.advisors.size > 0 %}
+          <p class="spot__advisor">Advised by {% include advisors.html list=post.advisors %}</p>
+        {% endif %}
         <div class="spot__actions">
           <a class="btn-x btn-x--sm" href="{{ base_path }}{{ post.url }}">Read more &rarr;</a>
           {% if post.paperurl %}<a class="btn-x btn-x--sm btn-x--ghost" href="{{ post.paperurl | escape }}" target="_blank" rel="noopener">Project page</a>{% endif %}

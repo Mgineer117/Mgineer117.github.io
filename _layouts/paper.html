@@ -108,6 +108,9 @@ layout: default
             {% if page.venue %}<div><dt>Venue</dt><dd>{{ page.venue }}</dd></div>{% endif %}
             {% if page.date %}<div><dt>Date</dt><dd>{{ page.date | date: "%B %Y" }}</dd></div>{% endif %}
             {% if page.instructor %}<div><dt>Instructor</dt><dd>{{ page.instructor }}</dd></div>{% endif %}
+            {% if page.advisors and page.advisors.size > 0 %}
+              <div><dt>Advised by</dt><dd>{% include advisors.html list=page.advisors %}</dd></div>
+            {% endif %}
             {% if page.semester %}<div><dt>Term</dt><dd>{{ page.semester }}</dd></div>{% endif %}
             {% if page.location %}<div><dt>Location</dt><dd>{{ page.location }}</dd></div>{% endif %}
             {% if page.tags and page.tags.size > 0 %}
