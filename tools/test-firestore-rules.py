@@ -106,6 +106,29 @@ def listing(token, filters):
     return (ok, [x["document"] for x in r if "document" in x] if ok else [])
 
 
+# --- view counters -------------------------------------------------------
+#
+# The one door in these rules that opens for an unauthenticated caller, so
+# the interesting cases are all the ways of pushing something other than +1
+# through it.
+
+VIEW_DOC = lambda pid: f"{ROOT}/views/{pid}"
+
+
+def bump(pid, path="/__rulestest__/", by=1):
+    ok, _ = call(f"{BASE}:commit?key={KEY}", {"writes": [{
+        "update": {"name": VIEW_DOC(pid), "fields": {"path": S(path)}},
+        "updateMask": {"fieldPaths": ["path"]},
+        "updateTransforms": [
+            {"fieldPath": "count", "increment": {"integerValue": str(by)}}]}]})
+    return ok
+
+
+def view_count(pid):
+    ok, r = call(f"{BASE}/views/{pid}?key={KEY}")
+    return int(r["fields"]["count"]["integerValue"]) if ok else None
+
+
 def main():
     failed = []
 
@@ -166,6 +189,44 @@ def main():
     else:
         print("\n  (set CBOX_OWNER_PASSWORD to test master mode too)")
         delete(mallory, secret)
+
+    # The view counter is written by people who have not signed in, so every
+    # one of these runs with nothing but the public key.
+    print("\n== a view counter only ever goes up by one ==")
+    pid = "_rulestest"
+    check("an uncounted page starts at one", bump(pid))
+    before = view_count(pid)
+    check("anyone may read the count", before is not None)
+    check("a second visit adds one", bump(pid) and view_count(pid) == before + 1)
+
+    at = view_count(pid)
+    check("cannot add two at a time", bump(pid, by=2), False)
+    check("cannot add a thousand", bump(pid, by=1000), False)
+    check("cannot count down", bump(pid, by=-1), False)
+    check("cannot repoint the page", bump(pid, path="/somewhere-else/"), False)
+    check("cannot set the count outright",
+          call(f"{BASE}:commit?key={KEY}", {"writes": [{
+              "update": {"name": VIEW_DOC(pid),
+                         "fields": {"path": S("/__rulestest__/"),
+                                    "count": {"integerValue": "99999"}}},
+              "updateMask": {"fieldPaths": ["path", "count"]}}]})[0], False)
+    check("cannot smuggle in another field",
+          call(f"{BASE}:commit?key={KEY}", {"writes": [{
+              "update": {"name": VIEW_DOC(pid),
+                         "fields": {"path": S("/__rulestest__/"), "junk": S("x")}},
+              "updateMask": {"fieldPaths": ["path", "junk"]},
+              "updateTransforms": [
+                  {"fieldPath": "count", "increment": {"integerValue": "1"}}]}]})[0], False)
+    check("cannot delete a counter",
+          call(f"{BASE}:commit?key={KEY}",
+               {"writes": [{"delete": VIEW_DOC(pid)}]})[0], False)
+    check("none of that moved the number", view_count(pid) == at)
+
+    # The id is part of the shape: the collection is for page slugs, not for
+    # whatever a stranger would like to store in it.
+    check("an id with capitals is refused", bump("BadId"), False)
+    check("an id starting with a dash is refused", bump("-nope"), False)
+    check("an id over 64 characters is refused", bump("a" * 65), False)
 
     for token in (alice, mallory):
         call(f"{IDP}/accounts:delete?key={KEY}", {"idToken": token})

@@ -25,6 +25,8 @@ layout: default
       <p class="eyebrow">
         {{ page.date | date: "%d %B %Y" }}
         {%- if page.read_time %} &middot; {% include read-time.html %}{% endif -%}
+        <span class="post-hits" data-views-box hidden>
+          &middot; <b data-views="page">&nbsp;</b> views</span>
       </p>
 
       <h1 class="post-title">{{ page.title | markdownify | remove: "<p>" | remove: "</p>" }}</h1>

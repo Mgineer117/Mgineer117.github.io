@@ -24,6 +24,18 @@
       </nav>
     </div>
 
+    <script type="application/json" id="views-config">
+      {
+        "apiKey": {{ site.firebase.apiKey | default: "" | jsonify }},
+        "projectId": {{ site.firebase.projectId | default: "" | jsonify }},
+        "page": {{ page.url | jsonify }}
+      }
+    </script>
+
+    <span class="masthead__hits" data-views-box hidden>
+      <b data-views="site">&nbsp;</b> visits
+    </span>
+
     <button type="button" class="theme-toggle" id="theme-toggle"
             aria-label="Switch theme" title="Switch theme">
       <svg class="theme-toggle__moon" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"

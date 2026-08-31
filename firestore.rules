@@ -93,6 +93,39 @@ service cloud.firestore {
                     && (resource.data.uid == request.auth.uid || isAdmin());
     }
 
+    // Page view counters, one document per page plus `_site` for the total.
+    //
+    // This is the only place an unauthenticated caller may write, because a
+    // view has to be counted before anyone has typed anything. What makes
+    // that safe is that the sole permitted write is "+1 and nothing else":
+    // the count must land on exactly one more than it held, no other field
+    // may move, and the document id has to look like a page slug so the
+    // collection cannot be used as free storage. A determined person can
+    // still sit in a loop and inflate a number; nothing here is a secret,
+    // and no other data is reachable through this door.
+    match /views/{pageId} {
+
+      function shapeOk() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['count', 'path'])
+            && d.count is int
+            && d.path is string && d.path.size() > 0 && d.path.size() <= 200
+            && pageId.size() <= 64
+            && pageId.matches('^[a-z0-9_][a-z0-9_-]*$');
+      }
+
+      allow read: if true;
+
+      // A page counted for the first time starts at one, never higher.
+      allow create: if shapeOk() && request.resource.data.count == 1;
+
+      allow update: if shapeOk()
+                    && request.resource.data.count == resource.data.count + 1
+                    && request.resource.data.path == resource.data.path;
+
+      allow delete: if false;
+    }
+
     // Nothing else is reachable from the browser.
     match /{document=**} {
       allow read, write: if false;

@@ -242,6 +242,36 @@ html, body { background-color: var(--paper); }
   .masthead__inner-wrap { padding-right: 44px; }
 }
 
+/* --------------------------------------------------------------------------
+   Visit counters
+   -------------------------------------------------------------------------- */
+
+.masthead__hits {
+  position: absolute;
+  right: 54px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 30;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--steel-2);
+}
+.masthead__hits b { font-weight: 600; color: var(--steel); }
+
+/* It is the least important thing in the bar, so it is the first to go when
+   the navigation needs the room. */
+@media (min-width: 1080px) {
+  .masthead__inner-wrap { padding-right: 168px; }
+}
+@media (max-width: 1079px) {
+  .masthead__hits { display: none; }
+}
+
+.post-hits b { font-weight: inherit; color: inherit; }
+
 
 body {
   font-family: var(--sans);
