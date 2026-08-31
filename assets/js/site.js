@@ -871,13 +871,19 @@
        search floods outward across the cover; the pointer keeps seeding fresh
        fronts, a click drops one. */
     search: {
-      settle: 40,
+      /* A frontier expanding into unexplored space. It has to stay a hint:
+         at full strength this one covered 40% of the cover and repainted a
+         tenth of it every frame, against 7% and 0.7% for the loudest of the
+         others, which reads as an animation the reader has to ignore rather
+         than a texture behind the title. Slower steps, a shorter trail and
+         a quieter frontier bring it back into that range. */
+      settle: 70,
       seed: function (W, H) {
         var sp = Math.max(13, Math.min(22, W / 70));
         var cols = Math.ceil(W / sp) + 1, rows = Math.ceil(H / sp) + 1;
         var cells = new Float32Array(cols * rows);        /* 0 = unvisited, else age */
         return { cells: cells, cols: cols, rows: rows, sp: sp,
-                 front: [], next: [], acc: 0, tick: 0.045, sow: 0 };
+                 front: [], next: [], acc: 0, tick: 0.13, sow: 0 };
       },
       sowAt: function (st, x, y) {
         var c = Math.round(x / st.sp), r = Math.round(y / st.sp);
@@ -892,12 +898,12 @@
         for (var i = 0; i < cells.length; i++) if (cells[i] > 0) cells[i] += dt;
 
         st.sow += dt;
-        if (st.sow > 0.5) {
+        if (st.sow > 1.1) {
           st.sow = 0;
           if (ptr && ptr.active > 0.4) {
             this.sowAt(st, ptr.x + (Math.random() - 0.5) * st.sp * 3,
                            ptr.y + (Math.random() - 0.5) * st.sp * 3);
-          } else if (st.front.length < 3) {
+          } else if (!st.front.length) {
             this.sowAt(st, Math.random() * W, Math.random() * H);
           }
         }
@@ -944,7 +950,7 @@
         for (i = 0; i < cells.length; i++) {
           var a = cells[i];
           if (!a) continue;
-          var fade = 1 - a * 0.30;
+          var fade = 1 - a * 0.6;
           if (fade < 0.05) continue;
           var b = Math.min(B - 1, (fade * B) | 0);
           bucket[b].push(i);
@@ -957,7 +963,7 @@
             var idx = list[k], c = idx % st.cols, r = (idx - c) / st.cols;
             ctx.rect(c * sp - half, r * sp - half, side, side);
           }
-          ctx.fillStyle = "rgba(" + BLUE + "," + (((b + 0.5) / B) * 0.30).toFixed(3) + ")";
+          ctx.fillStyle = "rgba(" + BLUE + "," + (((b + 0.5) / B) * 0.16).toFixed(3) + ")";
           ctx.fill();
         }
         ctx.beginPath();
@@ -965,7 +971,7 @@
           var fi = st.front[f], fc = fi % st.cols, fr = (fi - fc) / st.cols;
           ctx.rect(fc * sp - half, fr * sp - half, side, side);
         }
-        ctx.fillStyle = "rgba(" + ACCENT + ",0.85)";
+        ctx.fillStyle = "rgba(" + ACCENT + ",0.40)";
         ctx.fill();
       }
     },

@@ -235,12 +235,9 @@ html, body { background-color: var(--paper); }
   .theme-toggle, .theme-toggle svg { transition: none; }
 }
 
-/* Room for it at the end of the masthead. */
-.masthead__inner-wrap { position: relative; padding-right: 52px; }
-@media (max-width: 600px) {
-  .theme-toggle { width: 32px; height: 32px; right: 4px; }
-  .masthead__inner-wrap { padding-right: 44px; }
-}
+/* Room at the end of the masthead for the toggle and the counter beside it.
+   Measured, not guessed: the counter is 139px and the toggle 44. */
+.masthead__inner-wrap { position: relative; padding-right: 196px; }
 
 /* --------------------------------------------------------------------------
    Visit counters
@@ -264,13 +261,17 @@ html, body { background-color: var(--paper); }
 .masthead__hits i.sep { opacity: .5; margin: 0 3px; }
 [data-views-unit] { font-style: normal; }
 
-/* It is the least important thing in the bar, so it is the first to go when
-   the navigation needs the room. */
-@media (min-width: 1200px) {
-  .masthead__inner-wrap { padding-right: 250px; }
-}
-@media (max-width: 1199px) {
+/* Only phones lose it. Above that the greedy nav gives up a link to the
+   overflow menu before the counter goes, which is what that menu is for --
+   an earlier version reserved 250px and hid the counter below 1200px, which
+   took it off most laptop windows to protect a nav that had room to spare. */
+@media (max-width: 719px) {
   .masthead__hits { display: none; }
+  .masthead__inner-wrap { padding-right: 52px; }
+}
+@media (max-width: 600px) {
+  .theme-toggle { width: 32px; height: 32px; right: 4px; }
+  .masthead__inner-wrap { padding-right: 44px; }
 }
 
 .post-hits b { font-weight: inherit; color: inherit; }

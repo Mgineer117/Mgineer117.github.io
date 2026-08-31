@@ -54,6 +54,12 @@ async function tab(wsUrl) {
     ws.send(JSON.stringify({ id: n, method, params }));
   });
 
+  /* Not optional. Without the Page domain enabled,
+     addScriptToEvaluateOnNewDocument is accepted and then quietly ignored,
+     so a test that takes an API away still runs against an intact page and
+     passes having proved nothing. */
+  await send("Page.enable");
+
   return {
     send,
     close: () => ws.close(),

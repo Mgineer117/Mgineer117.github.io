@@ -130,13 +130,26 @@
       /* A document that does not exist yet is a real zero. Only a failed
          request leaves a counter hidden, so "0 views" and "offline" never
          look the same. */
+      var counts = {};
       for (var i = 0; i < rows.length; i++) {
         var name = rows[i].found ? rows[i].found.name : rows[i].missing;
         if (!name) continue;
         var f = rows[i].found && rows[i].found.fields;
-        show(name.slice(name.lastIndexOf("/") + 1),
-             parseInt((f && f.count && f.count.integerValue) || "0", 10));
+        counts[name.slice(name.lastIndexOf("/") + 1)] =
+          parseInt((f && f.count && f.count.integerValue) || "0", 10);
       }
+
+      /* Today cannot be more than all time. The two are incremented in one
+         atomic write so they do not drift on their own, but a session that
+         runs past Chicago midnight lands on the new day without adding to
+         the total, and a counter edited on the server can put them out of
+         step for good. Either way "7 visits · 8 today" is nonsense on the
+         face of it, and one line makes it unsayable. */
+      if (counts[dayId] != null && counts._site != null) {
+        counts[dayId] = Math.min(counts[dayId], counts._site);
+      }
+
+      for (var id in counts) show(id, counts[id]);
     });
   }
 
