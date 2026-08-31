@@ -1375,8 +1375,9 @@
     if (!roots.length) return;
 
     Array.prototype.forEach.call(roots, function (root) {
+      var itemSel = root.getAttribute("data-filter-items") || "[data-tags]";
       var buttons = root.querySelectorAll(".filter-btn");
-      var items = root.querySelectorAll(root.getAttribute("data-filter-items") || "[data-tags]");
+      var items = root.querySelectorAll(itemSel);
       var groups = root.querySelectorAll("[data-filter-group]");
       var syncUrl = root.hasAttribute("data-filter-url");
       if (!buttons.length || !items.length) return;
@@ -1387,14 +1388,22 @@
           item.classList.toggle("is-hidden", !(tag === "all" || tags.indexOf(tag) !== -1));
         });
 
-        /* hide a category heading once everything under it is filtered out */
         Array.prototype.forEach.call(groups, function (group) {
-          var kids = group.querySelectorAll(root.getAttribute("data-filter-items") || "[data-tags]");
-          var any = false;
+          var kids = group.querySelectorAll(itemSel);
+          var shown = 0;
           Array.prototype.forEach.call(kids, function (k) {
-            if (!k.classList.contains("is-hidden")) any = true;
+            if (!k.classList.contains("is-hidden")) shown++;
           });
-          group.classList.toggle("is-hidden", kids.length > 0 && !any);
+
+          /* The tally beside a heading counts what is on screen. Leaving it
+             at the category total under a filter says there are three
+             journal articles while one is shown. */
+          var badge = group.querySelector("[data-filter-count]") ||
+                      group.querySelector(".group-head em");
+          if (badge) badge.textContent = shown;
+
+          /* and the heading goes once there is nothing under it at all */
+          group.classList.toggle("is-hidden", kids.length > 0 && !shown);
         });
       }
 

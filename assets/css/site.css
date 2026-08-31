@@ -877,7 +877,9 @@ html.reveal-on .reveal.is-in {
 
 .work-card.is-hidden,
 .pub-card.is-hidden,
-.category-section.is-hidden { display: none !important; }
+/* and the heading of a group the filter emptied -- keyed off the attribute
+   the script already looks for, so a new group needs no new rule here */
+[data-filter-group].is-hidden { display: none !important; }
 
 /* --------------------------------------------------------------------------
    Timeline
