@@ -916,7 +916,7 @@
         for (i = 0; i < cells.length; i++) {
           if (cells[i] <= 0) continue;
           cells[i] += dt;
-          if (cells[i] > 3.4) cells[i] = 0;
+          if (cells[i] > 1.9) cells[i] = 0;
         }
 
         /* Nothing new starts while the last one is still spreading or still
@@ -976,7 +976,7 @@
         var A = 14,          /* opacity bands: fine enough to read smooth  */
             C = 4,           /* colour steps, frontier tint to trail tint  */
             PEAK = 0.38,     /* opacity of a cell the moment it is reached */
-            DECAY = 0.95,    /* per second; ~3.5s before it is invisible   */
+            DECAY = 1.95,    /* per second; ~1.8s before it is invisible   */
             WARM = 0.9,      /* seconds a cell keeps some frontier colour  */
             REACH = st.reach || 1;
 
