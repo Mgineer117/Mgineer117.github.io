@@ -871,19 +871,23 @@
        search floods outward across the cover; the pointer keeps seeding fresh
        fronts, a click drops one. */
     search: {
-      /* A frontier expanding into unexplored space. It has to stay a hint:
-         at full strength this one covered 40% of the cover and repainted a
-         tenth of it every frame, against 7% and 0.7% for the loudest of the
-         others, which reads as an animation the reader has to ignore rather
-         than a texture behind the title. Slower steps, a shorter trail and
-         a quieter frontier bring it back into that range. */
+      /* A ripple of exploration that dies out, not a front that marches.
+         A seed spreads outward, weakening with every ring it puts out, and
+         stops once it has spent itself; what it lit fades to nothing behind
+         it, and after a pause somewhere else starts. Earlier versions had
+         the frontier crossing the whole cover and then wiping the sheet in
+         one frame to start over -- always moving, and the reset was a
+         canvas-wide blink. Both of those are gone: the propagation is
+         supposed to disappear. */
       settle: 70,
       seed: function (W, H) {
         var sp = Math.max(13, Math.min(22, W / 70));
         var cols = Math.ceil(W / sp) + 1, rows = Math.ceil(H / sp) + 1;
         var cells = new Float32Array(cols * rows);        /* 0 = unvisited, else age */
-        return { cells: cells, cols: cols, rows: rows, sp: sp,
-                 front: [], next: [], acc: 0, tick: 0.11, sow: 0 };
+        var rings = new Float32Array(cols * rows);        /* how far out it was lit */
+        return { cells: cells, rings: rings, cols: cols, rows: rows, sp: sp,
+                 front: [], next: [], acc: 0, tick: 0.11, sow: 2.2,
+                 ring: 0, reach: 0 };
       },
       sowAt: function (st, x, y) {
         var c = Math.round(x / st.sp), r = Math.round(y / st.sp);
@@ -891,7 +895,12 @@
         var i = r * st.cols + c;
         if (st.cells[i] > 0) return;
         st.cells[i] = 0.0001;
+        st.rings[i] = 0;
         st.front.push(i);
+        st.ring = 0;
+        /* How far this one gets before it has nothing left. Varying it stops
+           the cover from looking like the same event on a timer. */
+        st.reach = 13 + Math.round(Math.random() * 9);
       },
       step: function (st, dt, t, W, H, ptr) {
         /* A cell ages, and once it has faded past seeing it is unvisited
@@ -901,27 +910,35 @@
            in a single frame -- the largest pop on the page, and the reason
            the cover kept emptying out. Nothing is ever cleared now; the
            sheet recycles behind the wave. */
-        var cells = st.cells;
-        for (var i = 0; i < cells.length; i++) {
+        /* A cell ages out and is unvisited again, so a later ripple can
+           cross the same ground. Nothing is ever cleared in bulk. */
+        var cells = st.cells, i;
+        for (i = 0; i < cells.length; i++) {
           if (cells[i] <= 0) continue;
           cells[i] += dt;
-          if (cells[i] > 3.6) cells[i] = 0;
+          if (cells[i] > 3.4) cells[i] = 0;
         }
 
+        /* Nothing new starts while the last one is still spreading or still
+           visible, so the cover really does empty out between ripples. */
         st.sow += dt;
-        if (st.sow > 1.1) {
-          st.sow = 0;
-          if (ptr && ptr.active > 0.4) {
+        if (ptr && ptr.active > 0.4) {
+          if (st.sow > 0.9) {
+            st.sow = 0;
             this.sowAt(st, ptr.x + (Math.random() - 0.5) * st.sp * 3,
                            ptr.y + (Math.random() - 0.5) * st.sp * 3);
-          } else if (!st.front.length) {
-            this.sowAt(st, Math.random() * W, Math.random() * H);
           }
+        } else if (!st.front.length && st.sow > 3.4) {
+          st.sow = 0;
+          this.sowAt(st, W * (0.15 + Math.random() * 0.7),
+                         H * (0.15 + Math.random() * 0.7));
         }
 
         st.acc += dt;
         while (st.acc > st.tick) {
           st.acc -= st.tick;
+          if (st.ring >= st.reach) { st.front.length = 0; break; }
+          st.ring++;
           var front = st.front, next = st.next;
           next.length = 0;
           for (var f = 0; f < front.length; f++) {
@@ -934,13 +951,13 @@
               var ni = nr * st.cols + nc;
               if (cells[ni] > 0) continue;
               cells[ni] = 0.0001;
+              st.rings[ni] = st.ring;
               next.push(ni);
             }
           }
           st.front = next;
           st.next = front;
         }
-
       },
       pulse: function (st, x, y) { this.sowAt(st, x, y); },
       /* A cell is brightest the instant the wave reaches it and thins from
@@ -958,9 +975,10 @@
 
         var A = 14,          /* opacity bands: fine enough to read smooth  */
             C = 4,           /* colour steps, frontier tint to trail tint  */
-            PEAK = 0.26,     /* opacity of a cell the moment it is reached */
+            PEAK = 0.38,     /* opacity of a cell the moment it is reached */
             DECAY = 0.95,    /* per second; ~3.5s before it is invisible   */
-            WARM = 0.9;      /* seconds a cell keeps some frontier colour  */
+            WARM = 0.9,      /* seconds a cell keeps some frontier colour  */
+            REACH = st.reach || 1;
 
         var bins = st.bins, i, q, k;
         if (!bins || bins.length !== A * C) {
@@ -972,7 +990,12 @@
         for (i = 0; i < cells.length; i++) {
           var a = cells[i];
           if (!a) continue;
-          var v = Math.exp(-a * DECAY);
+          /* Two things dim a cell: its own age, and how far out it was when
+             the ripple reached it. The second is what makes the propagation
+             spend itself rather than travel at full strength. */
+          var spent = 1 - st.rings[i] / REACH;
+          if (spent <= 0) continue;
+          var v = Math.exp(-a * DECAY) * spent;
           if (v * PEAK < 0.012) continue;      /* below this nothing shows */
           var warmth = a < WARM ? 1 - a / WARM : 0;
           bins[Math.min(C - 1, (warmth * C) | 0) * A +
